@@ -4,8 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>
-      Clock + Safe Drawer + Background + Countdown + Quotes (Responsive) - Close
-      X + Weather
+      Clock + Drawer + Background + Countdown + Quotes + IP Weather (SVG)
     </title>
     <style>
       html,
@@ -27,14 +26,14 @@
         padding: 0;
       }
 
-      /* 原来的 #bgVideo */
+      /* bg video */
       #bgVideo {
         position: fixed;
         inset: 0;
         width: 100%;
         height: 100%;
         object-position: center center;
-        z-index: 0; /* 从 -2 改为 0 */
+        z-index: 0;
         display: none;
         pointer-events: none;
         background: transparent;
@@ -42,9 +41,8 @@
 
       #clock {
         position: absolute;
-        left: 50%;
-        top: 18%;
-        transform: translate(-50%, -50%);
+        left: 5%;
+        top: 8%;
         text-align: center;
         color: #fff;
         z-index: 2;
@@ -52,12 +50,12 @@
         user-select: none;
       }
       #clock .date {
-        font-size: 20px;
+        font-size: 1.2rem;
         opacity: 0.95;
         letter-spacing: 0.08em;
       }
       #clock .time {
-        font-size: 72px;
+        font-size: 6rem;
         margin-top: 6px;
         letter-spacing: 0.04em;
       }
@@ -141,6 +139,7 @@
         word-break: break-word;
       }
 
+      /* drawer */
       .drawer-mask {
         position: fixed;
         inset: 0;
@@ -283,6 +282,7 @@
         white-space: pre-wrap;
       }
 
+      /* responsive */
       @media (max-width: 600px) {
         #clock .time {
           font-size: 48px;
@@ -311,6 +311,23 @@
           font-size: 16px;
         }
       }
+
+      /* ========== weather svg styles ========== */
+      /* 所有天气 svg 默认隐藏，通过 .show 显示 */
+      svg.weather-svg {
+        display: none;
+        width: 56px;
+        height: 56px;
+        vertical-align: middle;
+        transition: opacity 300ms ease, transform 300ms ease;
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      svg.weather-svg.show {
+        display: inline-block;
+        opacity: 1;
+        transform: translateY(0);
+      }
     </style>
   </head>
   <body>
@@ -319,6 +336,98 @@
     <div id="clock" title="点击打开设置">
       <div class="date"></div>
       <div class="time"></div>
+
+      <!-- WEATHER SVGs (占位图) -->
+      <!-- 请根据需求替换 svg 内容为你自己的图标 -->
+      <svg class="weather-svg sunshine" aria-hidden="true" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" fill="#FFD54A"></circle>
+        <g fill="#FFD54A" opacity="0.9">
+          <rect x="11.4" y="1" width="1.2" height="4.2" rx="0.6" />
+          <rect x="11.4" y="18.8" width="1.2" height="4.2" rx="0.6" />
+          <rect x="1" y="11.4" width="4.2" height="1.2" rx="0.6" />
+          <rect x="18.8" y="11.4" width="4.2" height="1.2" rx="0.6" />
+          <rect
+            x="3.2"
+            y="3.2"
+            width="1.2"
+            height="4.2"
+            transform="rotate(-45 3.2 3.2)"
+          ></rect>
+        </g>
+      </svg>
+
+      <svg class="weather-svg sun-cloud" aria-hidden="true" viewBox="0 0 24 24">
+        <circle cx="9" cy="9" r="3" fill="#FFD54A"></circle>
+        <path
+          d="M3 17a4 4 0 0 1 4-4h7a4 4 0 1 1 0 8H7a4 4 0 0 1-4-4z"
+          fill="#E0E7FF"
+        ></path>
+      </svg>
+
+      <svg
+        class="weather-svg windy-cloud"
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M2 7h12a2 2 0 110 4H6"
+          stroke="#A6B3C9"
+          stroke-width="1.6"
+          fill="none"
+          stroke-linecap="round"
+        />
+        <path
+          d="M4 13h9"
+          stroke="#A6B3C9"
+          stroke-width="1.6"
+          fill="none"
+          stroke-linecap="round"
+        />
+      </svg>
+
+      <svg
+        class="weather-svg rain-cloud"
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M5 15a4 4 0 014-4h6a4 4 0 010 8H9a4 4 0 01-4-4z"
+          fill="#E0E7FF"
+        ></path>
+        <g stroke="#4DA0FF" stroke-width="1.8" stroke-linecap="round">
+          <path d="M9 20v2"></path>
+          <path d="M12 20v3"></path>
+          <path d="M15 20v2"></path>
+        </g>
+      </svg>
+
+      <svg
+        class="weather-svg thunder-cloud"
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M6 14a4 4 0 014-4h6a4 4 0 010 8H10a4 4 0 01-4-4z"
+          fill="#DDE7FF"
+        ></path>
+        <path d="M13 18l-2 4 4-1-2 4" fill="#FFD15A"></path>
+      </svg>
+
+      <svg
+        class="weather-svg snow-cloud"
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M5 15a4 4 0 014-4h6a4 4 0 010 8H9a4 4 0 01-4-4z"
+          fill="#E8F0FF"
+        ></path>
+        <g stroke="#BFD8FF" stroke-width="1.6" stroke-linecap="round">
+          <path d="M9 20l0.5 0.5 M9 20l-0.5 0.5"></path>
+          <path d="M12 20l0.5 0.5 M12 20l-0.5 0.5"></path>
+          <path d="M15 20l0.5 0.5 M15 20l-0.5 0.5"></path>
+        </g>
+      </svg>
     </div>
 
     <div id="overlayText" aria-hidden="false">
@@ -330,6 +439,7 @@
       <div id="quoteBox"></div>
     </div>
 
+    <!-- drawer (与之前一致，省略注释) -->
     <div id="drawerMask" class="drawer-mask" aria-hidden="true">
       <div
         id="drawerPanel"
@@ -341,17 +451,14 @@
         <button id="closeDrawerBtn" class="close-btn" aria-label="关闭设置">
           ✕
         </button>
-
         <h2>设置（背景 / 倒计时 / 励志语 / 天气）</h2>
 
         <div class="drawer-section">
           <h3>背景</h3>
           <label class="btn" for="pickImg">选择图片背景</label>
           <input id="pickImg" type="file" accept="image/*" />
-
           <label class="btn" for="pickVideo">选择视频背景</label>
           <input id="pickVideo" type="file" accept="video/*" />
-
           <div style="margin-top: 10px">
             <strong>展示模式：</strong>
             <label style="margin-left: 10px"
@@ -411,30 +518,19 @@
         </div>
 
         <div class="drawer-section">
-          <h3>天气（每 1 小时自动刷新）</h3>
+          <h3>天气（每 1 小时自动刷新 — 使用 IP 获取）</h3>
           <div style="margin-top: 6px">
             <button id="getWeatherBtn" class="small">
-              获取当前天气（使用公共 key）
+              获取当前天气（通过公网 IP）
             </button>
           </div>
 
-          <!-- 新增：手动输入经纬度 -->
           <div style="margin-top: 10px">
-            <label style="font-weight: 600">手动输入经纬度（可保存）</label>
+            <label style="font-weight: 600">手动输入 IP（可保存）</label>
             <div style="display: flex; gap: 8px; margin-top: 8px">
               <input
-                id="manualLat"
-                placeholder="纬度 (lat)"
-                style="
-                  flex: 1;
-                  padding: 8px;
-                  border-radius: 6px;
-                  border: 1px solid #ddd;
-                "
-              />
-              <input
-                id="manualLon"
-                placeholder="经度 (lon)"
+                id="manualIp"
+                placeholder="公网 IP，例如：49.234.56.78"
                 style="
                   flex: 1;
                   padding: 8px;
@@ -444,29 +540,29 @@
               />
             </div>
             <div class="controls-row" style="margin-top: 8px">
-              <button id="saveCoordsBtn" class="small">保存并获取</button>
+              <button id="saveIpBtn" class="small">保存并获取</button>
               <button
-                id="clearCoordsBtn"
+                id="clearIpBtn"
                 class="small"
                 style="background: #f56c6c; color: #fff"
               >
-                清除经纬度
+                清除 IP
               </button>
             </div>
             <div class="muted" style="margin-top: 8px">
-              保存后会覆盖之前自动获取的经纬度并立即请求天气。
+              保存后会覆盖之前的 IP 并立即请求天气。
             </div>
           </div>
 
           <div style="margin-top: 8px">
             <div class="muted">
-              经纬度会保存到本地（键：<code>app_weather_coords</code>），最近一次天气保存在
+              已保存 IP（键：<code>app_weather_ip</code>），最近一次天气保存在
               <code>app_weather_last</code>。
             </div>
           </div>
           <div style="margin-top: 10px">
-            <strong>已保存经纬度：</strong>
-            <div id="savedCoords" class="muted" style="margin-top: 6px">
+            <strong>已保存 IP：</strong>
+            <div id="savedIp" class="muted" style="margin-top: 6px">
               （尚未保存）
             </div>
             <div style="margin-top: 6px">
@@ -499,25 +595,26 @@
     </div>
 
     <script>
+      // 存储键
       const KEY_BG_IMAGE = 'app_bg_image_data';
       const KEY_BG_VIDEO = 'app_bg_video_data';
       const KEY_BG_MODE = 'app_bg_mode';
       const KEY_COUNTDOWN = 'app_countdown_target';
       const KEY_QUOTES = 'app_quotes_list';
-      const KEY_WEATHER_COORDS = 'app_weather_coords';
+      const KEY_WEATHER_IP = 'app_weather_ip';
       const KEY_WEATHER_LAST = 'app_weather_last';
 
+      // 元素引用
       const dateEl = document.querySelector('#clock .date');
       const timeEl = document.querySelector('#clock .time');
       const clockEl = document.getElementById('clock');
 
       const bgVideo = document.getElementById('bgVideo');
-      const overlayText = document.getElementById('overlayText');
       const weatherBox = document.getElementById('weatherBox');
       const weatherIcon = document.getElementById('weatherIcon');
       const weatherSummary = document.getElementById('weatherSummary');
       const weatherRawPre = document.getElementById('weatherRaw');
-      const savedCoordsEl = document.getElementById('savedCoords');
+      const savedIpEl = document.getElementById('savedIp');
       const weatherLastEl = document.getElementById('weatherLast');
 
       const countdownDisplayMain = document.getElementById(
@@ -546,14 +643,13 @@
       const getWeatherBtn = document.getElementById('getWeatherBtn');
       const resetAllBtn = document.getElementById('resetAllBtn');
 
-      // 新增手动经纬度元素
-      const manualLat = document.getElementById('manualLat');
-      const manualLon = document.getElementById('manualLon');
-      const saveCoordsBtn = document.getElementById('saveCoordsBtn');
-      const clearCoordsBtn = document.getElementById('clearCoordsBtn');
+      const manualIp = document.getElementById('manualIp');
+      const saveIpBtn = document.getElementById('saveIpBtn');
+      const clearIpBtn = document.getElementById('clearIpBtn');
 
       let lastObjectURL = null;
       let weatherAutoTimer = null;
+
       function revokeLastURL() {
         if (lastObjectURL) {
           try {
@@ -613,29 +709,23 @@
         if (e.key === 'Escape') closeDrawer();
       });
 
-      /* background */
+      /* background handlers (与之前逻辑一致) */
       function applyMode(mode) {
-        // 如果 body 有背景图片（image），调整其 size
         if (document.body.style.backgroundImage) {
           document.body.style.backgroundSize =
             mode === 'cover' ? 'cover' : 'contain';
           document.body.style.backgroundRepeat = 'no-repeat';
           document.body.style.backgroundPosition = 'center center';
-          // 注意：不要在这里强制把 body 背景设为黑色，如果 video 正在显示会遮挡视频
-          if (bgVideo.style.display === 'block') {
+          if (bgVideo.style.display === 'block')
             document.body.style.backgroundColor = 'transparent';
-          } else {
+          else
             document.body.style.backgroundColor =
               mode === 'contain' ? '#000' : 'transparent';
-          }
         }
-
         if (bgVideo.style.display !== 'none') {
           bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
-          // 当 video 可见时保持 body 背景透明，这样视频会在 body 背景之上显示
           document.body.style.backgroundColor = 'transparent';
         }
-
         safeSetItem(KEY_BG_MODE, mode);
       }
       (function restoreModeUI() {
@@ -643,14 +733,13 @@
         for (const r of modeRadios) r.checked = r.value === saved;
         applyMode(saved);
       })();
-      for (const r of modeRadios) {
+      for (const r of modeRadios)
         r.addEventListener('change', () => {
           const v = document.querySelector(
             'input[name="bgMode"]:checked'
           ).value;
           applyMode(v);
         });
-      }
 
       pickImg.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files[0];
@@ -674,9 +763,7 @@
           if (!safeSetItem(KEY_BG_IMAGE, dataURL)) {
             alert('图片过大，无法保存到本地，但本次会话仍会显示。');
             localStorage.removeItem(KEY_BG_IMAGE);
-          } else {
-            localStorage.removeItem(KEY_BG_VIDEO);
-          }
+          } else localStorage.removeItem(KEY_BG_VIDEO);
         };
         reader.readAsDataURL(file);
         e.target.value = '';
@@ -703,9 +790,7 @@
                 '视频无法保存到 localStorage（可能过大），但本次会话会播放。'
               );
               localStorage.removeItem(KEY_BG_VIDEO);
-            } else {
-              localStorage.removeItem(KEY_BG_IMAGE);
-            }
+            } else localStorage.removeItem(KEY_BG_IMAGE);
           };
           reader.readAsDataURL(file);
         } else {
@@ -747,7 +832,6 @@
           bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
           bgVideo.muted = true;
           bgVideo.play().catch(() => {});
-          // 关键：当 video 在用时，让 body 背景透明，避免覆盖视频
           document.body.style.backgroundImage = '';
           document.body.style.backgroundColor = 'transparent';
         } else {
@@ -756,7 +840,6 @@
           bgVideo.style.display = 'none';
         }
       }
-
       restoreBackground();
 
       /* countdown */
@@ -864,9 +947,7 @@
             if (countdownInterval) clearInterval(countdownInterval);
             countdownInterval = setInterval(renderCountdownOnce, 1000);
             countdownPicker.value = new Date(ts).toISOString().slice(0, 16);
-          } else {
-            localStorage.removeItem(KEY_COUNTDOWN);
-          }
+          } else localStorage.removeItem(KEY_COUNTDOWN);
         }
       }
       restoreCountdown();
@@ -1043,7 +1124,7 @@
       }
       if (loadQuotes().length > 0) startQuoteCycleOnce();
 
-      /* weather */
+      /* ========== WEATHER (IP-based) ========== */
       const PUBLIC_WEATHER_ID = '88888888';
       const PUBLIC_WEATHER_KEY = '88888888';
 
@@ -1160,161 +1241,139 @@
         weatherBox.style.display = 'flex';
       }
 
-      async function fetchWeatherWithCoords(lat, lon) {
-        const base = 'https://cn.apihz.cn/api/tianqi/tqybjw1.php';
+      async function fetchWeatherWithIP(ip) {
+        const base = 'https://cn.apihz.cn/api/tianqi/tengxunip.php';
         const url = `${base}?id=${encodeURIComponent(
           PUBLIC_WEATHER_ID
         )}&key=${encodeURIComponent(
           PUBLIC_WEATHER_KEY
-        )}&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
+        )}&ip=${encodeURIComponent(ip)}`;
         weatherRawPre.textContent = '请求中...';
         try {
           const resp = await fetch(url);
           if (!resp.ok) throw new Error('网络错误: ' + resp.status);
           const data = await resp.json();
-          weatherRawPre.textContent = JSON.stringify(data, null, 2);
-          safeSetItem(
-            KEY_WEATHER_LAST,
-            JSON.stringify({ ts: Date.now(), query: { lat, lon }, data })
-          );
-          safeSetItem(KEY_WEATHER_COORDS, JSON.stringify({ lat, lon }));
-          updateSavedCoordsUI();
-          updateLastFetchUI();
-          const summary = extractWeatherSummary(data);
-          showWeatherSummary(summary);
-          return { ok: true, data };
+          console.log(resp, data);
+          if (data.code == 200) {
+            weatherRawPre.textContent = JSON.stringify(data, null, 2);
+            safeSetItem(
+              KEY_WEATHER_LAST,
+              JSON.stringify({ ts: Date.now(), query: { ip }, data })
+            );
+            safeSetItem(KEY_WEATHER_IP, ip);
+            updateSavedIpUI();
+            updateLastFetchUI();
+            const summary = extractWeatherSummary(data);
+            showWeatherSummary(summary);
+            // 同时显示对应 svg（关键点）
+            if (typeof showSvgFromSummary === 'function')
+              showSvgFromSummary(summary);
+          }
+           return { ok: true, data };
         } catch (err) {
           console.error('fetchWeather error', err);
           weatherRawPre.textContent = '请求失败: ' + err.message;
           showWeatherSummary(null);
+          // 隐藏 svg
+          if (typeof hideAllWeatherSVG === 'function') hideAllWeatherSVG();
           return { ok: false, error: err };
         }
       }
 
-      function getWeatherHandler() {
-        if (!navigator.geolocation) {
-          alert('当前浏览器不支持定位，请手动获取经纬度');
+      // 检测公网 IP（优先 ipify，失败再尝试 ifconfig.co）
+      async function detectPublicIp() {
+        try {
+          const resp = await fetch('https://api.ipify.org?format=json');
+          if (!resp.ok) throw new Error('ipify 网络错误: ' + resp.status);
+          const j = await resp.json();
+          return String(j.ip || '').trim();
+        } catch (err) {
+          console.warn('detectPublicIp failed', err);
+          try {
+            const resp2 = await fetch('https://ifconfig.co/json');
+            if (!resp2.ok) return '';
+            const j2 = await resp2.json();
+            return String(j2.ip || '').trim();
+          } catch (e) {
+            return '';
+          }
+        }
+      }
+
+      async function getWeatherHandler() {
+        weatherRawPre.textContent = '正在检测公网 IP...';
+        const ip = await detectPublicIp();
+        if (!ip) {
+          alert('无法检测到公网 IP，请手动输入 IP 并保存。');
+          weatherRawPre.textContent = '无法检测公网 IP';
           return;
         }
-
-        weatherRawPre.textContent = '正在获取设备定位...';
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            weatherRawPre.textContent = `已获取定位：lat=${lat}, lon=${lon}，正在请求天气接口...`;
-            await fetchWeatherWithCoords(lat, lon);
-            // 同步填入手动输入框
-            try {
-              manualLat.value = String(lat);
-              manualLon.value = String(lon);
-            } catch (e) {}
-          },
-          (err) => {
-            console.warn('定位失败', err);
-            weatherRawPre.textContent =
-              '定位失败: ' + (err.message || err.code);
-            alert(
-              '定位失败：' +
-                (err.message || err.code) +
-                '。请允许定位或稍后重试。'
-            );
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
+        weatherRawPre.textContent = `已检测到公网 IP：${ip}，正在请求天气接口...`;
+        await fetchWeatherWithIP(ip);
       }
       getWeatherBtn.addEventListener('click', getWeatherHandler);
 
-      // 保存并使用手动经纬度
-      saveCoordsBtn.addEventListener('click', async () => {
-        const lat = parseFloat(manualLat.value);
-        const lon = parseFloat(manualLon.value);
-        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-          alert('请输入有效的经纬度（数字）');
+      // 保存并使用手动 IP
+      saveIpBtn.addEventListener('click', async () => {
+        const ip = (manualIp.value || '').trim();
+        if (!ip) {
+          alert('请输入有效的公网 IP');
           return;
         }
-        safeSetItem(KEY_WEATHER_COORDS, JSON.stringify({ lat, lon }));
-        updateSavedCoordsUI();
-        weatherRawPre.textContent = `手动保存：lat=${lat}, lon=${lon}，正在请求天气接口...`;
-        await fetchWeatherWithCoords(lat, lon);
+        safeSetItem(KEY_WEATHER_IP, ip);
+        updateSavedIpUI();
+        weatherRawPre.textContent = `手动保存：ip=${ip}，正在请求天气接口...`;
+        await fetchWeatherWithIP(ip);
         closeDrawer();
       });
 
-      // 清除已保存经纬度
-      clearCoordsBtn.addEventListener('click', () => {
-        if (!confirm('确认清除已保存的经纬度？')) return;
-        localStorage.removeItem(KEY_WEATHER_COORDS);
-        updateSavedCoordsUI();
-        manualLat.value = '';
-        manualLon.value = '';
-        alert('已清除保存的经纬度');
+      // 清除 IP
+      clearIpBtn.addEventListener('click', () => {
+        if (!confirm('确认清除已保存的 IP？')) return;
+        localStorage.removeItem(KEY_WEATHER_IP);
+        updateSavedIpUI();
+        manualIp.value = '';
+        alert('已清除保存的 IP');
       });
 
       async function fetchWeatherAutoOnce() {
-        const coordsRaw = localStorage.getItem(KEY_WEATHER_COORDS);
-        if (coordsRaw) {
+        const ipRaw = localStorage.getItem(KEY_WEATHER_IP);
+        if (ipRaw) {
           try {
-            const obj = JSON.parse(coordsRaw);
-            if (
-              obj &&
-              typeof obj.lat === 'number' &&
-              typeof obj.lon === 'number'
-            ) {
-              await fetchWeatherWithCoords(obj.lat, obj.lon);
-              // 填入手动输入框
+            const ip = String(ipRaw).trim();
+            if (ip) {
+              await fetchWeatherWithIP(ip);
               try {
-                manualLat.value = String(obj.lat);
-                manualLon.value = String(obj.lon);
+                manualIp.value = ip;
               } catch (e) {}
               return;
             }
           } catch (e) {}
         }
-        if (!navigator.geolocation) {
-          console.warn('无法自动刷新：浏览器不支持定位且无已保存经纬度');
+        const detected = await detectPublicIp();
+        if (!detected) {
+          console.warn('无法自动检测公网 IP，等待用户手动输入或点击获取');
           return;
         }
         try {
-          const pos = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
-            });
-          });
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          // 填入手动输入框
-          try {
-            manualLat.value = String(lat);
-            manualLon.value = String(lon);
-          } catch (e) {}
-          await fetchWeatherWithCoords(lat, lon);
-        } catch (err) {
-          console.warn('自动刷新定位失败', err);
-        }
+          manualIp.value = detected;
+        } catch (e) {}
+        await fetchWeatherWithIP(detected);
       }
 
       function startAutoWeatherHourly() {
         if (weatherAutoTimer) clearInterval(weatherAutoTimer);
-        // 立即执行一次
         fetchWeatherAutoOnce();
-        // 每 60 分钟刷新一次
         weatherAutoTimer = setInterval(fetchWeatherAutoOnce, 60 * 60 * 1000);
       }
 
-      function updateSavedCoordsUI() {
-        const s = localStorage.getItem(KEY_WEATHER_COORDS);
+      function updateSavedIpUI() {
+        const s = localStorage.getItem(KEY_WEATHER_IP);
         if (!s) {
-          savedCoordsEl.textContent = '（尚未保存）';
+          savedIpEl.textContent = '（尚未保存）';
           return;
         }
-        try {
-          const obj = JSON.parse(s);
-          savedCoordsEl.textContent = `lat=${obj.lat}, lon=${obj.lon}`;
-        } catch (e) {
-          savedCoordsEl.textContent = '（解析失败）';
-        }
+        savedIpEl.textContent = `ip=${s}`;
       }
       function updateLastFetchUI() {
         const lastRaw = localStorage.getItem(KEY_WEATHER_LAST);
@@ -1344,25 +1403,88 @@
             weatherRawPre.textContent = JSON.stringify(parsed.data, null, 2);
             const summary = extractWeatherSummary(parsed.data);
             showWeatherSummary(summary);
+            if (typeof showSvgFromSummary === 'function')
+              showSvgFromSummary(summary);
           } catch (e) {
             weatherRawPre.textContent = '尚未获取';
           }
         } else weatherRawPre.textContent = '尚未获取';
-        updateSavedCoordsUI();
+        updateSavedIpUI();
         updateLastFetchUI();
-        // 如果已有已保存经纬度，把它填入输入框
         try {
-          const coordsRaw = localStorage.getItem(KEY_WEATHER_COORDS);
-          if (coordsRaw) {
-            const c = JSON.parse(coordsRaw);
-            if (c && typeof c.lat === 'number' && typeof c.lon === 'number') {
-              manualLat.value = String(c.lat);
-              manualLon.value = String(c.lon);
-            }
-          }
+          const ipRaw = localStorage.getItem(KEY_WEATHER_IP);
+          if (ipRaw) manualIp.value = String(ipRaw);
         } catch (e) {}
-        // 启动每小时自动刷新（若用户之前已保存 coords 则会立即刷新一次；否则等待用户首次允许定位）
         startAutoWeatherHourly();
+      })();
+
+      /* ========== SVG 显示逻辑 ========== */
+      (function () {
+        const SVG_CLASSES = [
+          'sunshine',
+          'sun-cloud',
+          'windy-cloud',
+          'rain-cloud',
+          'thunder-cloud',
+          'snow-cloud',
+        ];
+
+        // 隐藏所有 svg（暴露给外部）
+        window.hideAllWeatherSVG = function () {
+          document.querySelectorAll('svg.weather-svg').forEach((el) => {
+            el.classList.remove('show');
+            el.setAttribute('aria-hidden', 'true');
+          });
+        };
+
+        // 初始化隐藏
+        try {
+          hideAllWeatherSVG();
+        } catch (e) {}
+
+        function mapDescToType(desc) {
+          if (!desc) return 'sunshine';
+          const s = String(desc || '').toLowerCase();
+          if (/thunder|storm|雷|闪电|雷阵雨/.test(s)) return 'thunder-cloud';
+          if (/snow|下雪|雪|冰雹|sleet|hail/.test(s)) return 'snow-cloud';
+          if (/rain|shower|下雨|阵雨|降雨|drizzle/.test(s)) return 'rain-cloud';
+          if (/wind|windy|风|大风|狂风|breeze/.test(s)) return 'windy-cloud';
+          if (/cloud|cloudy|overcast|多云|阴|云/.test(s)) {
+            if (/partly|晴间|sunny intervals/.test(s)) return 'sun-cloud';
+            return 'sun-cloud';
+          }
+          if (/sun|clear|晴|晴朗/.test(s)) return 'sunshine';
+          return 'sunshine';
+        }
+
+        window.showSvgFromSummary = function (summary) {
+          try {
+            // 若 summary 带 icon（图片），优先显示图片并隐藏 svg（可按需修改）
+            if (summary && summary.icon) {
+              hideAllWeatherSVG();
+              if (weatherIcon) {
+                weatherIcon.src = summary.icon;
+                weatherIcon.style.display = 'inline-block';
+              }
+              return;
+            }
+            const desc =
+              (summary && (summary.desc || summary.text || '')) || '';
+            const type = mapDescToType(desc);
+            // 隐藏图片 icon（使用 svg）
+            if (weatherIcon) weatherIcon.style.display = 'none';
+            // 显示匹配的 svg
+            hideAllWeatherSVG();
+            const el = document.querySelector('svg.weather-svg.' + type);
+            if (el) {
+              el.classList.add('show');
+              el.setAttribute('aria-hidden', 'false');
+            }
+          } catch (e) {
+            console.warn('showSvgFromSummary failed', e);
+            hideAllWeatherSVG();
+          }
+        };
       })();
 
       /* restore all & reset */
@@ -1385,7 +1507,7 @@
         localStorage.removeItem(KEY_BG_MODE);
         localStorage.removeItem(KEY_COUNTDOWN);
         localStorage.removeItem(KEY_QUOTES);
-        localStorage.removeItem(KEY_WEATHER_COORDS);
+        localStorage.removeItem(KEY_WEATHER_IP);
         localStorage.removeItem(KEY_WEATHER_LAST);
         try {
           bgVideo.pause();
@@ -1410,16 +1532,19 @@
         quoteBox.textContent = '';
         weatherRawPre.textContent = '尚未获取';
         weatherBox.style.display = 'none';
-        savedCoordsEl.textContent = '（尚未保存）';
+        savedIpEl.textContent = '（尚未保存）';
         weatherLastEl.textContent = '（尚未刷新）';
         if (weatherAutoTimer) {
           clearInterval(weatherAutoTimer);
           weatherAutoTimer = null;
         }
-        manualLat.value = '';
-        manualLon.value = '';
+        manualIp.value = '';
         for (const r of modeRadios) r.checked = r.value === 'cover';
         safeSetItem(KEY_BG_MODE, 'cover');
+        // 隐藏 svg
+        try {
+          hideAllWeatherSVG();
+        } catch (e) {}
         closeDrawer();
         alert('已重置所有设置为默认。');
       });
