@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>
-      Clock + Drawer + Background + Countdown + Quotes + IP Weather (SVG)
+      Clock + Drawer + Background + Multi-Countdown + Quotes + IP Weather (SVG)
+      - Enhanced
     </title>
     <style>
       html,
@@ -24,9 +25,9 @@
       p {
         margin: 0;
         padding: 0;
+        color: #fff;
       }
 
-      /* bg video */
       #bgVideo {
         position: fixed;
         inset: 0;
@@ -104,21 +105,70 @@
         flex: 0 0 44px;
         display: inline-block;
       }
-      #weatherSummary {
-        font-size: 15px;
-      }
 
-      #countdownDisplayMain {
-        display: none;
-        color: #fff;
-        font-size: 20px;
-        padding: 8px 14px;
-        border-radius: 10px;
-        background: rgba(0, 0, 0, 0.45);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-        margin-bottom: 18px;
+      /* 多倒计时右上角列表 */
+      .countdowns-panel {
+        position: fixed;
+        right: 18px;
+        top: 18px;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
         pointer-events: auto;
       }
+      .countdown-card {
+        min-width: 300px;
+        max-width: 500px;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 10px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-left: 6px solid transparent;
+      }
+      .countdown-card .meta {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .countdown-card .label {
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .countdown-card .time {
+        font-family: monospace;
+        margin-top: 4px;
+        font-size: 13px;
+        color: #fffb;
+      }
+      .countdown-card .actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      /* 优先级颜色：通过 border-left 给予视觉提示 */
+      .priority-very {
+        border-left-color: #ff2e2e;
+        background: rgba(255, 46, 46, 0.08);
+      } /* <= 60s */
+      .priority-high {
+        border-left-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.06);
+      } /* <= 3600s */
+      .priority-medium {
+        border-left-color: #ffb86b;
+        background: rgba(255, 184, 107, 0.04);
+      } /* <= 86400s */
+      .priority-normal {
+        border-left-color: transparent;
+      }
+
       #quoteBox {
         color: #fff;
         font-size: 28px;
@@ -137,6 +187,7 @@
         min-height: 48px;
         white-space: pre-wrap;
         word-break: break-word;
+        z-index: 2;
       }
 
       /* drawer */
@@ -152,7 +203,7 @@
         position: absolute;
         top: 0;
         right: 0;
-        width: min(420px, 100vw);
+        width: min(520px, 100vw);
         height: 100%;
         background: #fff;
         color: #222;
@@ -170,15 +221,6 @@
         transform: translateX(0);
       }
 
-      h2 {
-        margin: 0 0 8px 0;
-        font-size: 18px;
-      }
-      .drawer-section {
-        margin-top: 14px;
-        padding-top: 8px;
-        border-top: 1px solid #eee;
-      }
       .btn {
         display: inline-block;
         width: 100%;
@@ -192,55 +234,6 @@
         user-select: none;
         border: none;
       }
-      .muted {
-        color: #888;
-        font-size: 13px;
-        margin-top: 6px;
-      }
-      input[type='file'] {
-        display: none;
-      }
-      textarea {
-        width: 100%;
-        resize: vertical;
-        min-height: 56px;
-      }
-
-      .quote-list {
-        margin-top: 8px;
-        max-height: 240px;
-        overflow: auto;
-        padding-right: 6px;
-      }
-      .quote-item {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        margin-top: 8px;
-        background: #f7f7f8;
-        padding: 8px;
-        border-radius: 6px;
-      }
-      .quote-item .text {
-        flex: 1;
-        font-size: 14px;
-        color: #222;
-        word-break: break-word;
-      }
-      .quote-item button {
-        background: transparent;
-        border: none;
-        color: #666;
-        cursor: pointer;
-        padding: 6px;
-        font-size: 14px;
-      }
-
-      .controls-row {
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
-      }
       .small {
         padding: 8px 10px;
         border-radius: 6px;
@@ -250,7 +243,36 @@
         flex: 1;
         text-align: center;
       }
+      .muted {
+        color: #666;
+        font-size: 13px;
+        margin-top: 6px;
+      }
 
+      input[type='file'] {
+        display: none;
+      }
+      textarea {
+        width: 100%;
+        resize: vertical;
+        min-height: 56px;
+      }
+      pre#weatherRaw {
+        max-height: 200px;
+        overflow: auto;
+        background: #0f1720;
+        color: #d7fff3;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+
+      .controls-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
       .close-btn {
         position: absolute;
         top: 12px;
@@ -271,49 +293,21 @@
         background: rgba(0, 0, 0, 0.06);
       }
 
-      pre#weatherRaw {
-        max-height: 200px;
-        overflow: auto;
-        background: #0f1720;
-        color: #d7fff3;
-        padding: 8px;
-        border-radius: 6px;
-        font-size: 12px;
-        white-space: pre-wrap;
-      }
-
-      /* responsive */
       @media (max-width: 600px) {
         #clock .time {
           font-size: 48px;
         }
         .drawer-panel {
           padding: 14px;
+          width: 100vw;
         }
         #quoteBox {
           font-size: 18px;
           padding: 10px 12px;
         }
-        .quote-list {
-          max-height: 200px;
-        }
-        .drawer-panel h2 {
-          font-size: 16px;
-        }
-        .muted {
-          font-size: 12px;
-        }
-        .close-btn {
-          top: 10px;
-          right: 10px;
-          width: 34px;
-          height: 34px;
-          font-size: 16px;
-        }
       }
 
-      /* ========== weather svg styles ========== */
-      /* 所有天气 svg 默认隐藏，通过 .show 显示 */
+      /* weather svg */
       svg.weather-svg {
         display: none;
         width: 56px;
@@ -328,6 +322,62 @@
         opacity: 1;
         transform: translateY(0);
       }
+
+      .icon-btn {
+        background: transparent;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 4px 6px;
+        border-radius: 4px;
+      }
+      .icon-btn.danger {
+        color: #ff7b7b;
+      }
+      /* 全屏按钮样式 */
+      #fullscreenBtn {
+         position: absolute;
+        top: 12px;
+        right: 60px;
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        border: none;
+        background: rgba(0, 0, 0, 0.04);
+        color: #444;
+        font-size: 18px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* 全屏时把倒计时区域放大到更显眼（> 半屏）并放大卡片 */
+      .countdowns-panel {
+        transition: width 220ms ease, max-height 220ms ease;
+        width: clamp(300px, 44vw, 760px);
+      }
+      body.is-fullscreen .countdowns-panel {
+        width: min(72vw, 1100px); /* 全屏时占视口的 ~72%（可调整为更大） */
+        top: 18px;
+        right: 18px;
+        max-height: calc(100vh - 36px);
+      }
+
+      /* 全屏时卡片更大、更易读 */
+      body.is-fullscreen .countdown-card {
+        padding: 16px 18px;
+        gap: 14px;
+        border-left-width: 10px;
+      }
+      body.is-fullscreen .countdown-card .label {
+        font-size: 20px;
+      }
+      body.is-fullscreen .countdown-card .time {
+        font-size: 16px;
+        margin-top: 8px;
+      }
     </style>
   </head>
   <body>
@@ -337,8 +387,7 @@
       <div class="date"></div>
       <div class="time"></div>
 
-      <!-- WEATHER SVGs (占位图) -->
-      <!-- 请根据需求替换 svg 内容为你自己的图标 -->
+      <!-- weather svgs -->
       <svg class="weather-svg sunshine" aria-hidden="true" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="4" fill="#FFD54A"></circle>
         <g fill="#FFD54A" opacity="0.9">
@@ -435,11 +484,13 @@
         <img id="weatherIcon" src="" alt="" style="display: none" />
         <div id="weatherSummary"></div>
       </div>
-      <div id="countdownDisplayMain">剩余 0 天 00:00:00</div>
       <div id="quoteBox"></div>
     </div>
 
-    <!-- drawer (与之前一致，省略注释) -->
+    <!-- 多倒计时面板 -->
+    <div class="countdowns-panel" id="countdownsPanel" aria-live="polite"></div>
+
+    <!-- drawer -->
     <div id="drawerMask" class="drawer-mask" aria-hidden="true">
       <div
         id="drawerPanel"
@@ -448,17 +499,55 @@
         aria-modal="true"
         aria-hidden="true"
       >
+       
         <button id="closeDrawerBtn" class="close-btn" aria-label="关闭设置">
           ✕
         </button>
-        <h2>设置（背景 / 倒计时 / 励志语 / 天气）</h2>
+        <h2 style="margin-bottom: 6px">
+          设置（背景 / 倒计时 / 励志语 / 天气）
+        </h2>
+         <button id="fullscreenBtn"  title="切换全屏">切换全屏</button>
 
         <div class="drawer-section">
           <h3>背景</h3>
-          <label class="btn" for="pickImg">选择图片背景</label>
+          <label class="btn" for="pickImg">选择图片背景（本地）</label>
           <input id="pickImg" type="file" accept="image/*" />
-          <label class="btn" for="pickVideo">选择视频背景</label>
+          <label class="btn" for="pickVideo" style="background: #5a9bd6"
+            >选择视频背景（本地）</label
+          >
           <input id="pickVideo" type="file" accept="video/*" />
+
+          <div style="margin-top: 10px">
+            <strong>或通过 URL 设置（图片 / 视频）</strong>
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <input
+                id="bgImageUrl"
+                placeholder="图片 URL，例如：https://..."
+                style="
+                  flex: 1;
+                  padding: 8px;
+                  border-radius: 6px;
+                  border: 1px solid #ddd;
+                "
+              />
+              <button id="applyBgImageUrl" class="small">应用</button>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <input
+                id="bgVideoUrl"
+                placeholder="视频 URL（mp4/webm）例如：https://..."
+                style="
+                  flex: 1;
+                  padding: 8px;
+                  border-radius: 6px;
+                  border: 1px solid #ddd;
+                "
+              />
+              <button id="applyBgVideoUrl" class="small">应用</button>
+            </div>
+            <div class="muted">视频跨域或服务器限制可能导致无法播放。</div>
+          </div>
+
           <div style="margin-top: 10px">
             <strong>展示模式：</strong>
             <label style="margin-left: 10px"
@@ -477,23 +566,55 @@
         </div>
 
         <div class="drawer-section">
-          <h3>倒计时</h3>
-          <input
-            id="countdownPicker"
-            type="datetime-local"
+          <h3>倒计时（支持多项，支持编辑 / 删除 / 优先级颜色）</h3>
+          <div
             style="
-              width: 100%;
-              padding: 8px;
-              border-radius: 6px;
-              border: 1px solid #ddd;
+              display: flex;
+              gap: 8px;
+              align-items: center;
+              margin-top: 8px;
             "
-          />
-          <div class="controls-row">
-            <button id="startCountdownBtn" class="small">开始</button>
-            <button id="pauseCountdownBtn" class="small">暂停</button>
-            <button id="resetCountdownBtn" class="small">重置</button>
+          >
+            <input
+              id="countdownLabel"
+              placeholder="用途/名称，例如：语文考试结束"
+              style="
+                flex: 1;
+                padding: 8px;
+                border-radius: 6px;
+                border: 1px solid #ddd;
+              "
+            />
           </div>
-          <div class="muted">倒计时会显示在背景上，刷新后会自动恢复。</div>
+          <div
+            style="
+              display: flex;
+              gap: 8px;
+              align-items: center;
+              margin-top: 8px;
+            "
+          >
+            <input
+              id="countdownDate"
+              type="datetime-local"
+              style="
+                flex: 1;
+                padding: 8px;
+                border-radius: 6px;
+                border: 1px solid #ddd;
+              "
+            />
+            <button id="addCountdownBtn" class="small">添加</button>
+          </div>
+          <div class="muted" style="margin-top: 8px">
+            添加后会出现在右上角列表，页面刷新后自动恢复（保存在
+            localStorage）。
+          </div>
+
+          <div style="margin-top: 10px">
+            <strong>已保存的倒计时</strong>
+            <div id="savedCountdownsList" style="margin-top: 8px"></div>
+          </div>
         </div>
 
         <div class="drawer-section">
@@ -538,9 +659,9 @@
                   border: 1px solid #ddd;
                 "
               />
+              <button id="saveIpBtn" class="small">保存并获取</button>
             </div>
             <div class="controls-row" style="margin-top: 8px">
-              <button id="saveIpBtn" class="small">保存并获取</button>
               <button
                 id="clearIpBtn"
                 class="small"
@@ -550,16 +671,11 @@
               </button>
             </div>
             <div class="muted" style="margin-top: 8px">
-              保存后会覆盖之前的 IP 并立即请求天气。
-            </div>
-          </div>
-
-          <div style="margin-top: 8px">
-            <div class="muted">
               已保存 IP（键：<code>app_weather_ip</code>），最近一次天气保存在
               <code>app_weather_last</code>。
             </div>
           </div>
+
           <div style="margin-top: 10px">
             <strong>已保存 IP：</strong>
             <div id="savedIp" class="muted" style="margin-top: 6px">
@@ -570,6 +686,7 @@
               ><span id="weatherLast" class="muted">（尚未刷新）</span>
             </div>
           </div>
+
           <div style="margin-top: 10px">
             <strong>接口返回（调试）</strong>
             <pre id="weatherRaw">尚未获取</pre>
@@ -595,20 +712,20 @@
     </div>
 
     <script>
-      // 存储键
+      /*******************************
+       * Keys & DOM
+       *******************************/
       const KEY_BG_IMAGE = 'app_bg_image_data';
       const KEY_BG_VIDEO = 'app_bg_video_data';
       const KEY_BG_MODE = 'app_bg_mode';
-      const KEY_COUNTDOWN = 'app_countdown_target';
       const KEY_QUOTES = 'app_quotes_list';
       const KEY_WEATHER_IP = 'app_weather_ip';
       const KEY_WEATHER_LAST = 'app_weather_last';
+      const KEY_COUNTDOWNS = 'app_countdowns_list';
 
-      // 元素引用
       const dateEl = document.querySelector('#clock .date');
       const timeEl = document.querySelector('#clock .time');
       const clockEl = document.getElementById('clock');
-
       const bgVideo = document.getElementById('bgVideo');
       const weatherBox = document.getElementById('weatherBox');
       const weatherIcon = document.getElementById('weatherIcon');
@@ -617,11 +734,6 @@
       const savedIpEl = document.getElementById('savedIp');
       const weatherLastEl = document.getElementById('weatherLast');
 
-      const countdownDisplayMain = document.getElementById(
-        'countdownDisplayMain'
-      );
-      const quoteBox = document.getElementById('quoteBox');
-
       const drawerMask = document.getElementById('drawerMask');
       const drawerPanel = document.getElementById('drawerPanel');
       const closeDrawerBtn = document.getElementById('closeDrawerBtn');
@@ -629,27 +741,33 @@
       const pickImg = document.getElementById('pickImg');
       const pickVideo = document.getElementById('pickVideo');
       const modeRadios = document.getElementsByName('bgMode');
+      const bgImageUrlInput = document.getElementById('bgImageUrl');
+      const applyBgImageUrlBtn = document.getElementById('applyBgImageUrl');
+      const bgVideoUrlInput = document.getElementById('bgVideoUrl');
+      const applyBgVideoUrlBtn = document.getElementById('applyBgVideoUrl');
 
-      const countdownPicker = document.getElementById('countdownPicker');
-      const startCountdownBtn = document.getElementById('startCountdownBtn');
-      const pauseCountdownBtn = document.getElementById('pauseCountdownBtn');
-      const resetCountdownBtn = document.getElementById('resetCountdownBtn');
+      const countdownLabelInput = document.getElementById('countdownLabel');
+      const countdownDateInput = document.getElementById('countdownDate');
+      const addCountdownBtn = document.getElementById('addCountdownBtn');
+      const savedCountdownsList = document.getElementById(
+        'savedCountdownsList'
+      );
+      const countdownsPanel = document.getElementById('countdownsPanel');
 
       const newQuoteText = document.getElementById('newQuoteText');
       const addQuoteBtn = document.getElementById('addQuoteBtn');
       const clearQuotesBtn = document.getElementById('clearQuotesBtn');
       const quoteListEl = document.getElementById('quoteList');
+      const quoteBox = document.getElementById('quoteBox');
 
       const getWeatherBtn = document.getElementById('getWeatherBtn');
-      const resetAllBtn = document.getElementById('resetAllBtn');
-
       const manualIp = document.getElementById('manualIp');
       const saveIpBtn = document.getElementById('saveIpBtn');
       const clearIpBtn = document.getElementById('clearIpBtn');
+      const resetAllBtn = document.getElementById('resetAllBtn');
 
       let lastObjectURL = null;
       let weatherAutoTimer = null;
-
       function revokeLastURL() {
         if (lastObjectURL) {
           try {
@@ -668,7 +786,9 @@
         }
       }
 
-      /* clock */
+      /*******************************
+       * Clock
+       *******************************/
       function updateClock() {
         const now = new Date();
         const y = now.getFullYear();
@@ -685,7 +805,9 @@
       updateClock();
       setInterval(updateClock, 1000);
 
-      /* drawer open/close */
+      /*******************************
+       * Drawer open/close
+       *******************************/
       function openDrawer() {
         drawerMask.classList.add('show');
         drawerPanel.classList.add('show');
@@ -709,7 +831,9 @@
         if (e.key === 'Escape') closeDrawer();
       });
 
-      /* background handlers (与之前逻辑一致) */
+      /*******************************
+       * Background (file & url)
+       *******************************/
       function applyMode(mode) {
         if (document.body.style.backgroundImage) {
           document.body.style.backgroundSize =
@@ -761,7 +885,7 @@
           } catch (e) {}
           bgVideo.style.display = 'none';
           if (!safeSetItem(KEY_BG_IMAGE, dataURL)) {
-            alert('图片过大，无法保存到本地，但本次会话仍会显示。');
+            alert('图片过大，无法保存到 localStorage，但本次会话仍会显示。');
             localStorage.removeItem(KEY_BG_IMAGE);
           } else localStorage.removeItem(KEY_BG_VIDEO);
         };
@@ -813,6 +937,58 @@
         e.target.value = '';
       });
 
+      applyBgImageUrlBtn.addEventListener('click', () => {
+        const url = (bgImageUrlInput.value || '').trim();
+        if (!url) {
+          alert('请输入图片 URL');
+          return;
+        }
+        try {
+          revokeLastURL();
+          document.body.style.backgroundImage = `url("${url}")`;
+          document.body.style.backgroundSize =
+            (localStorage.getItem(KEY_BG_MODE) || 'cover') === 'cover'
+              ? 'cover'
+              : 'contain';
+          document.body.style.backgroundPosition = 'center center';
+          document.body.style.backgroundRepeat = 'no-repeat';
+          try {
+            bgVideo.pause();
+            bgVideo.removeAttribute('src');
+            bgVideo.load();
+          } catch (e) {}
+          bgVideo.style.display = 'none';
+          safeSetItem(KEY_BG_IMAGE, url);
+          localStorage.removeItem(KEY_BG_VIDEO);
+          alert('已应用图片 URL 作为背景');
+        } catch (e) {
+          console.error(e);
+          alert('应用图片 URL 失败');
+        }
+      });
+
+      applyBgVideoUrlBtn.addEventListener('click', () => {
+        const url = (bgVideoUrlInput.value || 'https://wisdomhallsup.oss-cn-beijing.aliyuncs.com/798.mp4').trim();
+        if (!url) {
+          alert('请输入视频 URL');
+          return;
+        }
+        try {
+          revokeLastURL();
+          bgVideo.src = url;
+          bgVideo.style.display = 'block';
+          bgVideo.muted = true;
+          bgVideo.play().catch(() => {});
+          document.body.style.backgroundImage = '';
+          safeSetItem(KEY_BG_VIDEO, url);
+          localStorage.removeItem(KEY_BG_IMAGE);
+          alert('已应用视频 URL 作为背景（若无法播放请检查跨域与格式）');
+        } catch (e) {
+          console.error(e);
+          alert('应用视频 URL 失败');
+        }
+      });
+
       function restoreBackground() {
         const img = localStorage.getItem(KEY_BG_IMAGE);
         const vid = localStorage.getItem(KEY_BG_VIDEO);
@@ -842,117 +1018,350 @@
       }
       restoreBackground();
 
-      /* countdown */
-      let countdownTarget = null,
-        countdownRunning = false,
-        countdownInterval = null,
-        pausedRemaining = null;
-      function renderCountdownOnce() {
-        if (!countdownTarget && pausedRemaining == null) {
-          countdownDisplayMain.style.display = 'none';
-          return;
-        }
-        countdownDisplayMain.style.display = 'inline-block';
-        let remaining;
-        if (countdownRunning && countdownTarget)
-          remaining = countdownTarget - Date.now();
-        else if (!countdownRunning && pausedRemaining != null)
-          remaining = pausedRemaining;
-        else if (countdownTarget) remaining = countdownTarget - Date.now();
-        else remaining = 0;
-        if (remaining <= 0) {
-          countdownDisplayMain.textContent = '倒计时结束！';
-          clearInterval(countdownInterval);
-          countdownInterval = null;
-          countdownRunning = false;
-          localStorage.removeItem(KEY_COUNTDOWN);
-          return;
-        }
-        const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
-        const mins = Math.floor((remaining / (1000 * 60)) % 60);
-        const secs = Math.floor((remaining / 1000) % 60);
-        countdownDisplayMain.textContent = `剩余 ${days} 天 ${String(
-          hours
-        ).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(
-          secs
-        ).padStart(2, '0')}`;
-      }
-      function startCountdown(ts) {
-        if (!ts || ts <= Date.now()) {
-          alert('请选择未来的目标时间');
-          return;
-        }
-        countdownTarget = ts;
-        pausedRemaining = null;
-        countdownRunning = true;
-        safeSetItem(KEY_COUNTDOWN, String(ts));
-        if (countdownInterval) clearInterval(countdownInterval);
-        renderCountdownOnce();
-        countdownInterval = setInterval(renderCountdownOnce, 1000);
-      }
-      function pauseCountdown() {
-        if (!countdownRunning || !countdownTarget) return;
-        pausedRemaining = countdownTarget - Date.now();
-        countdownRunning = false;
-        if (countdownInterval) {
-          clearInterval(countdownInterval);
-          countdownInterval = null;
-        }
-        renderCountdownOnce();
-      }
-      function resetCountdown() {
-        if (!confirm('确认重置（清除）倒计时？')) return;
-        countdownTarget = null;
-        pausedRemaining = null;
-        countdownRunning = false;
-        if (countdownInterval) {
-          clearInterval(countdownInterval);
-          countdownInterval = null;
-        }
-        localStorage.removeItem(KEY_COUNTDOWN);
-        renderCountdownOnce();
-      }
-      startCountdownBtn.addEventListener('click', () => {
-        const val = countdownPicker.value;
-        if (!val && pausedRemaining == null) {
-          alert('请选择目标时间或恢复已暂停的倒计时');
-          return;
-        }
-        if (pausedRemaining != null && !val) {
-          countdownTarget = Date.now() + pausedRemaining;
-          pausedRemaining = null;
-          countdownRunning = true;
-          if (countdownInterval) clearInterval(countdownInterval);
-          countdownInterval = setInterval(renderCountdownOnce, 1000);
-          renderCountdownOnce();
-          closeDrawer();
-          return;
-        }
-        const ts = new Date(val).getTime();
-        startCountdown(ts);
-        closeDrawer();
-        countdownPicker.value = '';
-      });
-      pauseCountdownBtn.addEventListener('click', pauseCountdown);
-      resetCountdownBtn.addEventListener('click', resetCountdown);
-      function restoreCountdown() {
-        const saved = localStorage.getItem(KEY_COUNTDOWN);
-        if (saved) {
-          const ts = Number(saved);
-          if (!isNaN(ts) && ts > Date.now()) {
-            countdownTarget = ts;
-            countdownRunning = true;
-            renderCountdownOnce();
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(renderCountdownOnce, 1000);
-            countdownPicker.value = new Date(ts).toISOString().slice(0, 16);
-          } else localStorage.removeItem(KEY_COUNTDOWN);
+      /*******************************
+       * Countdown: load/save & helpers
+       *******************************/
+      function loadCountdowns() {
+        try {
+          const raw = localStorage.getItem(KEY_COUNTDOWNS);
+          if (!raw) return [];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr : [];
+        } catch (e) {
+          console.warn('loadCountdowns error', e);
+          return [];
         }
       }
-      restoreCountdown();
+      function saveCountdowns(list) {
+        try {
+          localStorage.setItem(KEY_COUNTDOWNS, JSON.stringify(list));
+        } catch (e) {
+          console.warn('saveCountdowns error', e);
+          alert('倒计时保存失败');
+        }
+      }
 
-      /* quotes */
+      // returns remaining object or null if ended
+      function computeRemaining(ts) {
+        const remaining = ts - Date.now();
+        if (remaining <= 0) return null;
+        const totalSec = Math.floor(remaining / 1000);
+        const days = Math.floor(totalSec / (3600 * 24));
+        const hours = Math.floor((totalSec % (3600 * 24)) / 3600);
+        const mins = Math.floor((totalSec % 3600) / 60);
+        const secs = totalSec % 60;
+        return { days, hours, mins, secs, totalSec };
+      }
+      function formatRemainingStr(ts) {
+        const r = computeRemaining(ts);
+        if (!r) return '已结束';
+        const hh = String(r.hours).padStart(2, '0');
+        const mm = String(r.mins).padStart(2, '0');
+        const ss = String(r.secs).padStart(2, '0');
+        return r.days <= 0
+          ? `${hh}:${mm}:${ss}`
+          : `${r.days} 天 ${hh}:${mm}:${ss}`;
+      }
+
+      // priority class
+      function getPriorityClass(ts) {
+        const r = computeRemaining(ts);
+        if (!r) return 'priority-very';
+        if (r.totalSec <= 60) return 'priority-very';
+        if (r.totalSec <= 3600) return 'priority-high';
+        if (r.totalSec <= 86400) return 'priority-medium';
+        return 'priority-normal';
+      }
+
+      /*******************************
+       * Notification & Sound
+       *******************************/
+      // Request notification permission (call on first interaction)
+      async function requestNotificationPermission() {
+        try {
+          if (!('Notification' in window)) return false;
+          if (Notification.permission === 'granted') return true;
+          if (Notification.permission === 'denied') return false;
+          const res = await Notification.requestPermission();
+          return res === 'granted';
+        } catch (e) {
+          console.warn('requestNotificationPermission error', e);
+          return false;
+        }
+      }
+
+      function showBrowserNotification(title, body) {
+        try {
+          if (!('Notification' in window)) return;
+          if (Notification.permission === 'granted') {
+            const n = new Notification(title, { body, silent: true });
+            // close after 8s
+            setTimeout(() => {
+              try {
+                n.close();
+              } catch (e) {}
+            }, 8000);
+          }
+        } catch (e) {
+          console.warn('showBrowserNotification error', e);
+        }
+      }
+
+      // beep sound via WebAudio
+      function playBeep() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine';
+          o.frequency.value = 880;
+          g.gain.value = 0.0001;
+          o.connect(g);
+          g.connect(ctx.destination);
+
+          // ramp up then down
+          const now = ctx.currentTime;
+          g.gain.cancelScheduledValues(now);
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.exponentialRampToValueAtTime(0.2, now + 0.02);
+          o.start(now);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+          setTimeout(() => {
+            try {
+              o.stop();
+              ctx.close();
+            } catch (e) {}
+          }, 1400);
+        } catch (e) {
+          console.warn('playBeep failed', e);
+        }
+      }
+
+      /*******************************
+       * Trigger when single countdown ends
+       *******************************/
+      function handleCountdownEnd(item) {
+        // Play beep and show notification
+        try {
+          playBeep();
+          showBrowserNotification(
+            item.label || '倒计时结束',
+            `目标时间已到：${item.label || ''}`
+          );
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+
+      /*******************************
+       * Render countdown panels & saved list (with edit/delete)
+       *******************************/
+      function renderCountdownsPanel() {
+        const list = loadCountdowns();
+        countdownsPanel.innerHTML = '';
+        if (!list || list.length === 0) return;
+        list.forEach((item) => {
+          const card = document.createElement('div');
+          card.className = 'countdown-card ' + getPriorityClass(item.ts);
+
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+          const lbl = document.createElement('div');
+          lbl.className = 'label';
+          lbl.textContent = item.label || '（未命名）';
+          const t = document.createElement('div');
+          t.className = 'time';
+          t.textContent = formatRemainingStr(item.ts);
+          meta.appendChild(lbl);
+          meta.appendChild(t);
+
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+          const editBtn = document.createElement('button');
+          editBtn.className = 'icon-btn';
+          editBtn.title = '编辑';
+          editBtn.textContent = '✎';
+          editBtn.addEventListener('click', () => openEditCountdown(item.id));
+          const delBtn = document.createElement('button');
+          delBtn.className = 'icon-btn danger';
+          delBtn.title = '删除';
+          delBtn.textContent = '✕';
+          delBtn.addEventListener('click', () => {
+            if (!confirm('确认删除该倒计时？')) return;
+            removeCountdown(item.id);
+          });
+
+          actions.appendChild(editBtn);
+          actions.appendChild(delBtn);
+          card.appendChild(meta);
+          card.appendChild(actions);
+          countdownsPanel.appendChild(card);
+        });
+      }
+
+      function renderSavedCountdownsList() {
+        const list = loadCountdowns();
+        savedCountdownsList.innerHTML = '';
+        if (!list || list.length === 0) {
+          savedCountdownsList.innerHTML = '<div class="muted">暂无倒计时</div>';
+          return;
+        }
+        list.forEach((item) => {
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.justifyContent = 'space-between';
+          row.style.alignItems = 'center';
+          row.style.padding = '8px 0';
+          row.style.borderBottom = '1px dashed #eee';
+          const left = document.createElement('div');
+          left.style.flex = '1';
+          const title = document.createElement('div');
+          title.style.fontWeight = '600';
+          title.textContent = item.label;
+          const sub = document.createElement('div');
+          sub.className = 'muted';
+          sub.style.fontSize = '12px';
+          sub.textContent = '目标：' + new Date(item.ts).toLocaleString();
+          left.appendChild(title);
+          left.appendChild(sub);
+
+          const right = document.createElement('div');
+          // edit
+          const editBtn = document.createElement('button');
+          editBtn.className = 'small';
+          editBtn.textContent = '编辑';
+          editBtn.addEventListener('click', () => openEditCountdown(item.id));
+          // delete
+          const delBtn = document.createElement('button');
+          delBtn.className = 'small';
+          delBtn.style.marginLeft = '6px';
+          delBtn.style.background = '#f56c6c';
+          delBtn.style.color = '#fff';
+          delBtn.textContent = '删除';
+          delBtn.addEventListener('click', () => {
+            if (!confirm('确认删除？')) return;
+            removeCountdown(item.id);
+          });
+          right.appendChild(editBtn);
+          right.appendChild(delBtn);
+
+          row.appendChild(left);
+          row.appendChild(right);
+          savedCountdownsList.appendChild(row);
+        });
+      }
+
+      function addCountdown() {
+        const label = (countdownLabelInput.value || '').trim();
+        const dt = (countdownDateInput.value || '').trim();
+        if (!label) {
+          alert('请输入倒计时用途/名称');
+          return;
+        }
+        if (!dt) {
+          alert('请选择目标时间');
+          return;
+        }
+        const ts = new Date(dt).getTime();
+        if (isNaN(ts) || ts <= Date.now()) {
+          alert('请选择未来时间');
+          return;
+        }
+        const list = loadCountdowns();
+        const id = 'cd_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        list.push({ id, label, ts, notified: false });
+        saveCountdowns(list);
+        countdownLabelInput.value = '';
+        countdownDateInput.value = '';
+        renderSavedCountdownsList();
+        renderCountdownsPanel();
+        // ask notification permission proactively
+        requestNotificationPermission().catch(() => {});
+      }
+      addCountdownBtn.addEventListener('click', addCountdown);
+
+      function removeCountdown(id) {
+        let list = loadCountdowns();
+        list = list.filter((i) => i.id !== id);
+        saveCountdowns(list);
+        renderSavedCountdownsList();
+        renderCountdownsPanel();
+      }
+
+      /*******************************
+       * Edit countdown (prompt-based)
+       *******************************/
+      function openEditCountdown(id) {
+        const list = loadCountdowns();
+        const item = list.find((i) => i.id === id);
+        if (!item) {
+          alert('未找到该倒计时');
+          return;
+        }
+        // 使用 prompt 简单实现编辑（可替换成 modal）
+        const newLabel = prompt('编辑名称：', item.label || '');
+        if (newLabel === null) return; // 取消
+        const newDateStr = prompt(
+          '编辑目标时间（ISO 或 本地格式，例如 2025-12-31T09:00 或 2025-12-31 09:00:00）：',
+          new Date(item.ts).toISOString().slice(0, 16)
+        );
+        if (newDateStr === null) return; // 取消
+        // 尝试解析时间
+        let parsedTs = Date.parse(newDateStr);
+        if (isNaN(parsedTs)) {
+          // try replace space with T
+          parsedTs = Date.parse(newDateStr.replace(' ', 'T'));
+        }
+        if (isNaN(parsedTs) || parsedTs <= Date.now()) {
+          alert('日期无效或不是未来时间，编辑已取消。');
+          return;
+        }
+        item.label = String(newLabel).trim() || item.label;
+        item.ts = Number(parsedTs);
+        item.notified = false; // reset notification flag
+        saveCountdowns(list);
+        renderSavedCountdownsList();
+        renderCountdownsPanel();
+      }
+
+      /*******************************
+       * Periodic tick: update UI, detect endings
+       *******************************/
+      // 每秒刷新右上显示并检测是否触发通知（只触发一次）
+      setInterval(() => {
+        const list = loadCountdowns();
+        let changed = false;
+        for (let item of list) {
+          const r = computeRemaining(item.ts);
+          if (!r) {
+            // 已结束
+            if (!item.notified) {
+              // trigger only once
+              item.notified = true;
+              changed = true;
+              try {
+                handleCountdownEnd(item);
+              } catch (e) {
+                console.warn(e);
+              }
+            }
+          } else {
+            // 未结束：如果之前已通知（例如用户编辑回到未来），重置
+            if (item.notified) {
+              item.notified = false;
+              changed = true;
+            }
+          }
+        }
+        if (changed) saveCountdowns(list);
+        // 重新渲染 panels
+        renderCountdownsPanel();
+        renderSavedCountdownsList();
+      }, 1000);
+
+      /*******************************
+       * Quotes (typing)
+       *******************************/
       function loadQuotes() {
         const raw = localStorage.getItem(KEY_QUOTES);
         if (!raw) return [];
@@ -976,10 +1385,19 @@
         arr.forEach((q, idx) => {
           const item = document.createElement('div');
           item.className = 'quote-item';
+          item.style.display = 'flex';
+          item.style.gap = '6px';
+          item.style.alignItems = 'center';
+          item.style.marginTop = '8px';
+          item.style.background = '#f7f7f8';
+          item.style.padding = '8px';
+          item.style.borderRadius = '6px';
           const t = document.createElement('div');
           t.className = 'text';
+          t.style.flex = '1';
+          t.style.fontSize = '14px';
+          t.style.color = '#222';
           t.textContent = q;
-          item.appendChild(t);
           const up = document.createElement('button');
           up.textContent = '↑';
           up.title = '上移';
@@ -989,9 +1407,6 @@
           const del = document.createElement('button');
           del.textContent = '✕';
           del.title = '删除';
-          item.appendChild(up);
-          item.appendChild(down);
-          item.appendChild(del);
           up.addEventListener('click', () => {
             if (idx === 0) return;
             const arr = loadQuotes();
@@ -1013,30 +1428,14 @@
             saveQuotes(arr);
             renderQuoteList();
           });
+          item.appendChild(t);
+          item.appendChild(up);
+          item.appendChild(down);
+          item.appendChild(del);
           quoteListEl.appendChild(item);
         });
       }
       renderQuoteList();
-      addQuoteBtn.addEventListener('click', () => {
-        const txt = newQuoteText.value.trim();
-        if (!txt) {
-          alert('请输入励志语');
-          return;
-        }
-        const arr = loadQuotes();
-        arr.push(txt);
-        saveQuotes(arr);
-        newQuoteText.value = '';
-        renderQuoteList();
-        startQuoteCycleOnce();
-      });
-      clearQuotesBtn.addEventListener('click', () => {
-        if (!confirm('确认清空所有励志语？')) return;
-        saveQuotes([]);
-        renderQuoteList();
-        stopQuoteCycle();
-        quoteBox.textContent = '';
-      });
 
       let quoteCyclePromise = null;
       let quoteCycleActive = true;
@@ -1123,11 +1522,32 @@
         quoteCyclePromise = null;
       }
       if (loadQuotes().length > 0) startQuoteCycleOnce();
+      addQuoteBtn.addEventListener('click', () => {
+        const txt = (newQuoteText.value || '').trim();
+        if (!txt) {
+          alert('请输入励志语');
+          return;
+        }
+        const arr = loadQuotes();
+        arr.push(txt);
+        saveQuotes(arr);
+        newQuoteText.value = '';
+        renderQuoteList();
+        startQuoteCycleOnce();
+      });
+      clearQuotesBtn.addEventListener('click', () => {
+        if (!confirm('确认清空所有励志语？')) return;
+        saveQuotes([]);
+        renderQuoteList();
+        stopQuoteCycle();
+        quoteBox.textContent = '';
+      });
 
-      /* ========== WEATHER (IP-based) ========== */
+      /*******************************
+       * Weather (IP-based) - same as before (kept)
+       *******************************/
       const PUBLIC_WEATHER_ID = '88888888';
       const PUBLIC_WEATHER_KEY = '88888888';
-
       function extractWeatherSummary(json) {
         const result = {
           city: null,
@@ -1150,19 +1570,17 @@
                 key.includes('location') ||
                 key.includes('addr') ||
                 key.includes('county'))
-            ) {
+            )
               if (typeof v === 'string') result.city = v;
-            }
             if (
               !result.temp &&
               (key.includes('temp') ||
                 key.includes('tem') ||
                 key.includes('wendu') ||
                 key.includes('temperature'))
-            ) {
+            )
               if (typeof v === 'number' || typeof v === 'string')
                 result.temp = v;
-            }
             if (
               !result.desc &&
               (key.includes('wea') ||
@@ -1170,38 +1588,30 @@
                 key.includes('desc') ||
                 key.includes('text') ||
                 key.includes('info'))
-            ) {
+            )
               if (typeof v === 'string') result.desc = v;
-            }
             if (
               !result.humidity &&
               (key.includes('humidity') || key.includes('shidu'))
-            ) {
+            )
               if (typeof v === 'number' || typeof v === 'string')
                 result.humidity = v;
-            }
-            if (
-              !result.wind &&
-              (key.includes('wind') || key.includes('feng'))
-            ) {
+            if (!result.wind && (key.includes('wind') || key.includes('feng')))
               if (typeof v === 'string') result.wind = v;
-            }
             if (
               !result.icon &&
               (key.includes('icon') ||
                 key.includes('img') ||
                 key.includes('pict') ||
                 key.includes('image'))
-            ) {
+            )
               if (typeof v === 'string') result.icon = v;
-            }
             if (typeof v === 'object') walk(v);
           }
         }
         walk(json);
         return result;
       }
-
       function escapeHtml(s) {
         return String(s).replace(
           /[&<>"']/g,
@@ -1215,7 +1625,6 @@
             }[m])
         );
       }
-
       function showWeatherSummary(summary) {
         if (!summary) {
           weatherBox.style.display = 'none';
@@ -1235,9 +1644,7 @@
         if (summary.icon) {
           weatherIcon.src = summary.icon;
           weatherIcon.style.display = 'inline-block';
-        } else {
-          weatherIcon.style.display = 'none';
-        }
+        } else weatherIcon.style.display = 'none';
         weatherBox.style.display = 'flex';
       }
 
@@ -1253,34 +1660,28 @@
           const resp = await fetch(url);
           if (!resp.ok) throw new Error('网络错误: ' + resp.status);
           const data = await resp.json();
-          console.log(resp, data);
-          if (data.code == 200) {
-            weatherRawPre.textContent = JSON.stringify(data, null, 2);
-            safeSetItem(
-              KEY_WEATHER_LAST,
-              JSON.stringify({ ts: Date.now(), query: { ip }, data })
-            );
-            safeSetItem(KEY_WEATHER_IP, ip);
-            updateSavedIpUI();
-            updateLastFetchUI();
-            const summary = extractWeatherSummary(data);
-            showWeatherSummary(summary);
-            // 同时显示对应 svg（关键点）
-            if (typeof showSvgFromSummary === 'function')
-              showSvgFromSummary(summary);
-          }
-           return { ok: true, data };
+          weatherRawPre.textContent = JSON.stringify(data, null, 2);
+          safeSetItem(
+            KEY_WEATHER_LAST,
+            JSON.stringify({ ts: Date.now(), query: { ip }, data })
+          );
+          safeSetItem(KEY_WEATHER_IP, ip);
+          updateSavedIpUI();
+          updateLastFetchUI();
+          const summary = extractWeatherSummary(data);
+          showWeatherSummary(summary);
+          if (typeof showSvgFromSummary === 'function')
+            showSvgFromSummary(summary);
+          return { ok: true, data };
         } catch (err) {
           console.error('fetchWeather error', err);
           weatherRawPre.textContent = '请求失败: ' + err.message;
           showWeatherSummary(null);
-          // 隐藏 svg
           if (typeof hideAllWeatherSVG === 'function') hideAllWeatherSVG();
           return { ok: false, error: err };
         }
       }
 
-      // 检测公网 IP（优先 ipify，失败再尝试 ifconfig.co）
       async function detectPublicIp() {
         try {
           const resp = await fetch('https://api.ipify.org?format=json');
@@ -1313,7 +1714,6 @@
       }
       getWeatherBtn.addEventListener('click', getWeatherHandler);
 
-      // 保存并使用手动 IP
       saveIpBtn.addEventListener('click', async () => {
         const ip = (manualIp.value || '').trim();
         if (!ip) {
@@ -1327,7 +1727,6 @@
         closeDrawer();
       });
 
-      // 清除 IP
       clearIpBtn.addEventListener('click', () => {
         if (!confirm('确认清除已保存的 IP？')) return;
         localStorage.removeItem(KEY_WEATHER_IP);
@@ -1418,30 +1817,19 @@
         startAutoWeatherHourly();
       })();
 
-      /* ========== SVG 显示逻辑 ========== */
+      /*******************************
+       * SVG mapping (same as before)
+       *******************************/
       (function () {
-        const SVG_CLASSES = [
-          'sunshine',
-          'sun-cloud',
-          'windy-cloud',
-          'rain-cloud',
-          'thunder-cloud',
-          'snow-cloud',
-        ];
-
-        // 隐藏所有 svg（暴露给外部）
         window.hideAllWeatherSVG = function () {
           document.querySelectorAll('svg.weather-svg').forEach((el) => {
             el.classList.remove('show');
             el.setAttribute('aria-hidden', 'true');
           });
         };
-
-        // 初始化隐藏
         try {
           hideAllWeatherSVG();
         } catch (e) {}
-
         function mapDescToType(desc) {
           if (!desc) return 'sunshine';
           const s = String(desc || '').toLowerCase();
@@ -1456,10 +1844,8 @@
           if (/sun|clear|晴|晴朗/.test(s)) return 'sunshine';
           return 'sunshine';
         }
-
         window.showSvgFromSummary = function (summary) {
           try {
-            // 若 summary 带 icon（图片），优先显示图片并隐藏 svg（可按需修改）
             if (summary && summary.icon) {
               hideAllWeatherSVG();
               if (weatherIcon) {
@@ -1471,9 +1857,7 @@
             const desc =
               (summary && (summary.desc || summary.text || '')) || '';
             const type = mapDescToType(desc);
-            // 隐藏图片 icon（使用 svg）
             if (weatherIcon) weatherIcon.style.display = 'none';
-            // 显示匹配的 svg
             hideAllWeatherSVG();
             const el = document.querySelector('svg.weather-svg.' + type);
             if (el) {
@@ -1487,12 +1871,15 @@
         };
       })();
 
-      /* restore all & reset */
+      /*******************************
+       * Restore other & reset
+       *******************************/
       (function restoreAll() {
         restoreBackground();
-        restoreCountdown();
         renderQuoteList();
         if (loadQuotes().length > 0) startQuoteCycleOnce();
+        renderSavedCountdownsList();
+        renderCountdownsPanel();
       })();
 
       resetAllBtn.addEventListener('click', () => {
@@ -1505,7 +1892,7 @@
         localStorage.removeItem(KEY_BG_IMAGE);
         localStorage.removeItem(KEY_BG_VIDEO);
         localStorage.removeItem(KEY_BG_MODE);
-        localStorage.removeItem(KEY_COUNTDOWN);
+        localStorage.removeItem(KEY_COUNTDOWNS);
         localStorage.removeItem(KEY_QUOTES);
         localStorage.removeItem(KEY_WEATHER_IP);
         localStorage.removeItem(KEY_WEATHER_LAST);
@@ -1518,14 +1905,8 @@
         revokeLastURL();
         document.body.style.backgroundImage = '';
         document.body.style.backgroundColor = '#000';
-        if (countdownInterval) {
-          clearInterval(countdownInterval);
-          countdownInterval = null;
-        }
-        countdownTarget = null;
-        pausedRemaining = null;
-        countdownRunning = false;
-        countdownDisplayMain.style.display = 'none';
+        renderSavedCountdownsList();
+        renderCountdownsPanel();
         stopQuoteCycle();
         saveQuotes([]);
         renderQuoteList();
@@ -1541,7 +1922,6 @@
         manualIp.value = '';
         for (const r of modeRadios) r.checked = r.value === 'cover';
         safeSetItem(KEY_BG_MODE, 'cover');
-        // 隐藏 svg
         try {
           hideAllWeatherSVG();
         } catch (e) {}
@@ -1553,6 +1933,116 @@
         revokeLastURL();
         if (weatherAutoTimer) clearInterval(weatherAutoTimer);
       });
+
+      /*******************************
+       * Proactively request notification on first interaction
+       *******************************/
+      (function setupInteractionPermission() {
+        function tryRequest() {
+          // ask permission only once on first click of page
+          requestNotificationPermission().catch(() => {});
+          document.removeEventListener('click', tryRequest);
+        }
+        document.addEventListener('click', tryRequest);
+      })();
+
+      // ---------- 全屏切换逻辑 ----------
+      (function () {
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (!fullscreenBtn) return;
+
+        function hasNativeRequestFS(elem) {
+          return !!(
+            elem.requestFullscreen ||
+            elem.webkitRequestFullscreen ||
+            elem.mozRequestFullScreen ||
+            elem.msRequestFullscreen
+          );
+        }
+
+        async function requestFull(el) {
+          const fn =
+            el.requestFullscreen ||
+            el.webkitRequestFullscreen ||
+            el.mozRequestFullScreen ||
+            el.msRequestFullscreen;
+          if (!fn) throw new Error('浏览器不支持 requestFullscreen');
+          return fn.call(el);
+        }
+        async function exitFull() {
+          const fn =
+            document.exitFullscreen ||
+            document.webkitExitFullscreen ||
+            document.mozCancelFullScreen ||
+            document.msExitFullscreen;
+          if (!fn) throw new Error('浏览器不支持 exitFullscreen');
+          return fn.call(document);
+        }
+
+        // 同步 body class 与按钮图标
+        function syncFullUI() {
+          const isFull = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement
+          );
+          document.body.classList.toggle('is-fullscreen', isFull);
+          fullscreenBtn.textContent = isFull ? '⤡' : '⤢';
+          fullscreenBtn.title = isFull ? '退出全屏 (F)' : '进入全屏 (F)';
+        }
+
+        // 点击切换
+        fullscreenBtn.addEventListener('click', async () => {
+          try {
+            const isFull = !!(
+              document.fullscreenElement ||
+              document.webkitFullscreenElement ||
+              document.mozFullScreenElement ||
+              document.msFullscreenElement
+            );
+            if (!isFull) {
+              await requestFull(document.documentElement);
+            } else {
+              await exitFull();
+            }
+          } catch (err) {
+            console.warn('全屏切换失败：', err);
+            alert(
+              '无法切换全屏：' +
+                (err && err.message
+                  ? err.message
+                  : '请在支持全屏的浏览器中使用')
+            );
+          }
+        });
+
+        // 监听全屏变化（兼容厂商前缀）
+        [
+          'fullscreenchange',
+          'webkitfullscreenchange',
+          'mozfullscreenchange',
+          'MSFullscreenChange',
+        ].forEach((evt) => {
+          document.addEventListener(evt, syncFullUI);
+        });
+
+        // 快捷键：按 F 切换（避免在 input/textarea 中触发）
+        document.addEventListener('keydown', (e) => {
+          const tag =
+            (document.activeElement && document.activeElement.tagName) || '';
+          if (
+            (e.key === 'f' || e.key === 'F') &&
+            !['INPUT', 'TEXTAREA'].includes(tag)
+          ) {
+            e.preventDefault();
+            fullscreenBtn.click();
+          }
+        });
+
+        // 初始同步（如果页面已在全屏）
+        syncFullUI();
+      })();
     </script>
   </body>
 </html>
