@@ -27,13 +27,14 @@
         padding: 0;
       }
 
+      /* 原来的 #bgVideo */
       #bgVideo {
         position: fixed;
         inset: 0;
         width: 100%;
         height: 100%;
         object-position: center center;
-        z-index: -2;
+        z-index: 0; /* 从 -2 改为 0 */
         display: none;
         pointer-events: none;
         background: transparent;
@@ -418,17 +419,43 @@
           </div>
 
           <!-- 新增：手动输入经纬度 -->
-          <div style="margin-top:10px;">
-            <label style="font-weight:600">手动输入经纬度（可保存）</label>
-            <div style="display:flex;gap:8px;margin-top:8px;">
-              <input id="manualLat" placeholder="纬度 (lat)" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd;" />
-              <input id="manualLon" placeholder="经度 (lon)" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd;" />
+          <div style="margin-top: 10px">
+            <label style="font-weight: 600">手动输入经纬度（可保存）</label>
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <input
+                id="manualLat"
+                placeholder="纬度 (lat)"
+                style="
+                  flex: 1;
+                  padding: 8px;
+                  border-radius: 6px;
+                  border: 1px solid #ddd;
+                "
+              />
+              <input
+                id="manualLon"
+                placeholder="经度 (lon)"
+                style="
+                  flex: 1;
+                  padding: 8px;
+                  border-radius: 6px;
+                  border: 1px solid #ddd;
+                "
+              />
             </div>
-            <div class="controls-row" style="margin-top:8px;">
+            <div class="controls-row" style="margin-top: 8px">
               <button id="saveCoordsBtn" class="small">保存并获取</button>
-              <button id="clearCoordsBtn" class="small" style="background:#f56c6c;color:#fff">清除经纬度</button>
+              <button
+                id="clearCoordsBtn"
+                class="small"
+                style="background: #f56c6c; color: #fff"
+              >
+                清除经纬度
+              </button>
             </div>
-            <div class="muted" style="margin-top:8px;">保存后会覆盖之前自动获取的经纬度并立即请求天气。</div>
+            <div class="muted" style="margin-top: 8px">
+              保存后会覆盖之前自动获取的经纬度并立即请求天气。
+            </div>
           </div>
 
           <div style="margin-top: 8px">
@@ -588,19 +615,27 @@
 
       /* background */
       function applyMode(mode) {
+        // 如果 body 有背景图片（image），调整其 size
         if (document.body.style.backgroundImage) {
           document.body.style.backgroundSize =
             mode === 'cover' ? 'cover' : 'contain';
           document.body.style.backgroundRepeat = 'no-repeat';
           document.body.style.backgroundPosition = 'center center';
-          document.body.style.backgroundColor =
-            mode === 'contain' ? '#000' : 'transparent';
+          // 注意：不要在这里强制把 body 背景设为黑色，如果 video 正在显示会遮挡视频
+          if (bgVideo.style.display === 'block') {
+            document.body.style.backgroundColor = 'transparent';
+          } else {
+            document.body.style.backgroundColor =
+              mode === 'contain' ? '#000' : 'transparent';
+          }
         }
+
         if (bgVideo.style.display !== 'none') {
           bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
-          document.body.style.backgroundColor =
-            mode === 'contain' ? '#000' : 'transparent';
+          // 当 video 可见时保持 body 背景透明，这样视频会在 body 背景之上显示
+          document.body.style.backgroundColor = 'transparent';
         }
+
         safeSetItem(KEY_BG_MODE, mode);
       }
       (function restoreModeUI() {
@@ -712,15 +747,16 @@
           bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
           bgVideo.muted = true;
           bgVideo.play().catch(() => {});
+          // 关键：当 video 在用时，让 body 背景透明，避免覆盖视频
           document.body.style.backgroundImage = '';
-          document.body.style.backgroundColor =
-            mode === 'contain' ? '#000' : 'transparent';
+          document.body.style.backgroundColor = 'transparent';
         } else {
           document.body.style.backgroundImage = '';
           document.body.style.backgroundColor = '#000';
           bgVideo.style.display = 'none';
         }
       }
+
       restoreBackground();
 
       /* countdown */
@@ -1169,7 +1205,10 @@
             weatherRawPre.textContent = `已获取定位：lat=${lat}, lon=${lon}，正在请求天气接口...`;
             await fetchWeatherWithCoords(lat, lon);
             // 同步填入手动输入框
-            try { manualLat.value = String(lat); manualLon.value = String(lon); } catch(e){}
+            try {
+              manualLat.value = String(lat);
+              manualLon.value = String(lon);
+            } catch (e) {}
           },
           (err) => {
             console.warn('定位失败', err);
@@ -1223,7 +1262,10 @@
             ) {
               await fetchWeatherWithCoords(obj.lat, obj.lon);
               // 填入手动输入框
-              try { manualLat.value = String(obj.lat); manualLon.value = String(obj.lon); } catch(e){}
+              try {
+                manualLat.value = String(obj.lat);
+                manualLon.value = String(obj.lon);
+              } catch (e) {}
               return;
             }
           } catch (e) {}
@@ -1243,7 +1285,10 @@
           const lat = pos.coords.latitude;
           const lon = pos.coords.longitude;
           // 填入手动输入框
-          try { manualLat.value = String(lat); manualLon.value = String(lon); } catch(e){}
+          try {
+            manualLat.value = String(lat);
+            manualLon.value = String(lon);
+          } catch (e) {}
           await fetchWeatherWithCoords(lat, lon);
         } catch (err) {
           console.warn('自动刷新定位失败', err);
