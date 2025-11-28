@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>
+      Clock + Safe Drawer + Background + Countdown + Quotes (Responsive) - Close
+      X + Weather
+    </title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Inter, 'Helvetica Neue', Arial;
+        background: #000;
+        overflow: hidden;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      p {
+        margin: 0;
+        padding: 0;
+      }
+
+      #bgVideo {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-position: center center;
+        z-index: -2;
+        display: none;
+        pointer-events: none;
+        background: transparent;
+      }
+
+      #clock {
+        position: absolute;
+        left: 50%;
+        top: 18%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #fff;
+        z-index: 2;
+        cursor: pointer;
+        user-select: none;
+      }
+      #clock .date {
+        font-size: 20px;
+        opacity: 0.95;
+        letter-spacing: 0.08em;
+      }
+      #clock .time {
+        font-size: 72px;
+        margin-top: 6px;
+        letter-spacing: 0.04em;
+      }
+
+      #overlayText {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        padding: 20px;
+      }
+      #overlayText::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.22);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      #weatherBox {
+        display: none;
+        color: #fff;
+        font-size: 16px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        background: linear-gradient(
+          90deg,
+          rgba(0, 0, 0, 0.5),
+          rgba(0, 0, 0, 0.35)
+        );
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+        margin-bottom: 12px;
+        pointer-events: auto;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      #weatherIcon {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        display: inline-block;
+      }
+      #weatherSummary {
+        font-size: 15px;
+      }
+
+      #countdownDisplayMain {
+        display: none;
+        color: #fff;
+        font-size: 20px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.45);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        margin-bottom: 18px;
+        pointer-events: auto;
+      }
+      #quoteBox {
+        color: #fff;
+        font-size: 28px;
+        max-width: 90%;
+        text-align: center;
+        padding: 12px 18px;
+        border-radius: 8px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.04),
+          rgba(255, 255, 255, 0.02)
+        );
+        box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+        line-height: 1.35;
+        pointer-events: auto;
+        min-height: 48px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .drawer-mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.42);
+        z-index: 9999;
+        display: none;
+        backdrop-filter: blur(2px);
+      }
+      .drawer-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: min(420px, 100vw);
+        height: 100%;
+        background: #fff;
+        color: #222;
+        overflow-y: auto;
+        box-shadow: -12px 0 40px rgba(0, 0, 0, 0.25);
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 18px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .drawer-mask.show {
+        display: block;
+      }
+      .drawer-panel.show {
+        transform: translateX(0);
+      }
+
+      h2 {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+      }
+      .drawer-section {
+        margin-top: 14px;
+        padding-top: 8px;
+        border-top: 1px solid #eee;
+      }
+      .btn {
+        display: inline-block;
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+        text-align: center;
+        background: #409eff;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        user-select: none;
+        border: none;
+      }
+      .muted {
+        color: #888;
+        font-size: 13px;
+        margin-top: 6px;
+      }
+      input[type='file'] {
+        display: none;
+      }
+      textarea {
+        width: 100%;
+        resize: vertical;
+        min-height: 56px;
+      }
+
+      .quote-list {
+        margin-top: 8px;
+        max-height: 240px;
+        overflow: auto;
+        padding-right: 6px;
+      }
+      .quote-item {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin-top: 8px;
+        background: #f7f7f8;
+        padding: 8px;
+        border-radius: 6px;
+      }
+      .quote-item .text {
+        flex: 1;
+        font-size: 14px;
+        color: #222;
+        word-break: break-word;
+      }
+      .quote-item button {
+        background: transparent;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        padding: 6px;
+        font-size: 14px;
+      }
+
+      .controls-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .small {
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background: #fff;
+        cursor: pointer;
+        flex: 1;
+        text-align: center;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        border: none;
+        background: rgba(0, 0, 0, 0.04);
+        color: #444;
+        font-size: 18px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .close-btn:hover {
+        background: rgba(0, 0, 0, 0.06);
+      }
+
+      pre#weatherRaw {
+        max-height: 200px;
+        overflow: auto;
+        background: #0f1720;
+        color: #d7fff3;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+
+      @media (max-width: 600px) {
+        #clock .time {
+          font-size: 48px;
+        }
+        .drawer-panel {
+          padding: 14px;
+        }
+        #quoteBox {
+          font-size: 18px;
+          padding: 10px 12px;
+        }
+        .quote-list {
+          max-height: 200px;
+        }
+        .drawer-panel h2 {
+          font-size: 16px;
+        }
+        .muted {
+          font-size: 12px;
+        }
+        .close-btn {
+          top: 10px;
+          right: 10px;
+          width: 34px;
+          height: 34px;
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <video id="bgVideo" autoplay muted loop playsinline></video>
+
+    <div id="clock" title="点击打开设置">
+      <div class="date"></div>
+      <div class="time"></div>
+    </div>
+
+    <div id="overlayText" aria-hidden="false">
+      <div id="weatherBox">
+        <img id="weatherIcon" src="" alt="" style="display: none" />
+        <div id="weatherSummary"></div>
+      </div>
+      <div id="countdownDisplayMain">剩余 0 天 00:00:00</div>
+      <div id="quoteBox"></div>
+    </div>
+
+    <div id="drawerMask" class="drawer-mask" aria-hidden="true">
+      <div
+        id="drawerPanel"
+        class="drawer-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-hidden="true"
+      >
+        <button id="closeDrawerBtn" class="close-btn" aria-label="关闭设置">
+          ✕
+        </button>
+
+        <h2>设置（背景 / 倒计时 / 励志语 / 天气）</h2>
+
+        <div class="drawer-section">
+          <h3>背景</h3>
+          <label class="btn" for="pickImg">选择图片背景</label>
+          <input id="pickImg" type="file" accept="image/*" />
+
+          <label class="btn" for="pickVideo">选择视频背景</label>
+          <input id="pickVideo" type="file" accept="video/*" />
+
+          <div style="margin-top: 10px">
+            <strong>展示模式：</strong>
+            <label style="margin-left: 10px"
+              ><input type="radio" name="bgMode" value="cover" />
+              铺满（cover）</label
+            >
+            <label style="margin-left: 10px"
+              ><input type="radio" name="bgMode" value="contain" />
+              完整（contain）</label
+            >
+          </div>
+          <div class="muted">
+            图片保存到 localStorage（可能失败）。视频 ≤5MB 保存到
+            localStorage，>5MB 刷新后不可恢复。
+          </div>
+        </div>
+
+        <div class="drawer-section">
+          <h3>倒计时</h3>
+          <input
+            id="countdownPicker"
+            type="datetime-local"
+            style="
+              width: 100%;
+              padding: 8px;
+              border-radius: 6px;
+              border: 1px solid #ddd;
+            "
+          />
+          <div class="controls-row">
+            <button id="startCountdownBtn" class="small">开始</button>
+            <button id="pauseCountdownBtn" class="small">暂停</button>
+            <button id="resetCountdownBtn" class="small">重置</button>
+          </div>
+          <div class="muted">倒计时会显示在背景上，刷新后会自动恢复。</div>
+        </div>
+
+        <div class="drawer-section">
+          <h3>励志语（打字机效果）</h3>
+          <textarea
+            id="newQuoteText"
+            rows="2"
+            placeholder="输入一条励志语..."
+          ></textarea>
+          <div class="controls-row" style="margin-top: 8px">
+            <button id="addQuoteBtn" class="small">添加</button>
+            <button
+              id="clearQuotesBtn"
+              class="small"
+              style="background: #f56c6c; color: #fff"
+            >
+              清空
+            </button>
+          </div>
+          <div class="quote-list" id="quoteList"></div>
+          <div class="muted">励志语会按顺序轮播并带打字机效果。</div>
+        </div>
+
+        <div class="drawer-section">
+          <h3>天气（每 1 小时自动刷新）</h3>
+          <div style="margin-top: 6px">
+            <button id="getWeatherBtn" class="small">
+              获取当前天气（使用公共 key）
+            </button>
+          </div>
+
+          <!-- 新增：手动输入经纬度 -->
+          <div style="margin-top:10px;">
+            <label style="font-weight:600">手动输入经纬度（可保存）</label>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <input id="manualLat" placeholder="纬度 (lat)" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd;" />
+              <input id="manualLon" placeholder="经度 (lon)" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd;" />
+            </div>
+            <div class="controls-row" style="margin-top:8px;">
+              <button id="saveCoordsBtn" class="small">保存并获取</button>
+              <button id="clearCoordsBtn" class="small" style="background:#f56c6c;color:#fff">清除经纬度</button>
+            </div>
+            <div class="muted" style="margin-top:8px;">保存后会覆盖之前自动获取的经纬度并立即请求天气。</div>
+          </div>
+
+          <div style="margin-top: 8px">
+            <div class="muted">
+              经纬度会保存到本地（键：<code>app_weather_coords</code>），最近一次天气保存在
+              <code>app_weather_last</code>。
+            </div>
+          </div>
+          <div style="margin-top: 10px">
+            <strong>已保存经纬度：</strong>
+            <div id="savedCoords" class="muted" style="margin-top: 6px">
+              （尚未保存）
+            </div>
+            <div style="margin-top: 6px">
+              <strong>上次刷新：</strong
+              ><span id="weatherLast" class="muted">（尚未刷新）</span>
+            </div>
+          </div>
+          <div style="margin-top: 10px">
+            <strong>接口返回（调试）</strong>
+            <pre id="weatherRaw">尚未获取</pre>
+          </div>
+        </div>
+
+        <div class="drawer-section">
+          <h3>重置</h3>
+          <div class="muted" style="margin-bottom: 8px">
+            重置将清除背景、倒计时、励志语、天气缓存与展示模式。
+          </div>
+          <button
+            id="resetAllBtn"
+            class="btn"
+            style="background: #333; margin-top: 6px"
+          >
+            重置所有设置
+          </button>
+        </div>
+
+        <div style="height: 40px"></div>
+      </div>
+    </div>
+
+    <script>
+      const KEY_BG_IMAGE = 'app_bg_image_data';
+      const KEY_BG_VIDEO = 'app_bg_video_data';
+      const KEY_BG_MODE = 'app_bg_mode';
+      const KEY_COUNTDOWN = 'app_countdown_target';
+      const KEY_QUOTES = 'app_quotes_list';
+      const KEY_WEATHER_COORDS = 'app_weather_coords';
+      const KEY_WEATHER_LAST = 'app_weather_last';
+
+      const dateEl = document.querySelector('#clock .date');
+      const timeEl = document.querySelector('#clock .time');
+      const clockEl = document.getElementById('clock');
+
+      const bgVideo = document.getElementById('bgVideo');
+      const overlayText = document.getElementById('overlayText');
+      const weatherBox = document.getElementById('weatherBox');
+      const weatherIcon = document.getElementById('weatherIcon');
+      const weatherSummary = document.getElementById('weatherSummary');
+      const weatherRawPre = document.getElementById('weatherRaw');
+      const savedCoordsEl = document.getElementById('savedCoords');
+      const weatherLastEl = document.getElementById('weatherLast');
+
+      const countdownDisplayMain = document.getElementById(
+        'countdownDisplayMain'
+      );
+      const quoteBox = document.getElementById('quoteBox');
+
+      const drawerMask = document.getElementById('drawerMask');
+      const drawerPanel = document.getElementById('drawerPanel');
+      const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+
+      const pickImg = document.getElementById('pickImg');
+      const pickVideo = document.getElementById('pickVideo');
+      const modeRadios = document.getElementsByName('bgMode');
+
+      const countdownPicker = document.getElementById('countdownPicker');
+      const startCountdownBtn = document.getElementById('startCountdownBtn');
+      const pauseCountdownBtn = document.getElementById('pauseCountdownBtn');
+      const resetCountdownBtn = document.getElementById('resetCountdownBtn');
+
+      const newQuoteText = document.getElementById('newQuoteText');
+      const addQuoteBtn = document.getElementById('addQuoteBtn');
+      const clearQuotesBtn = document.getElementById('clearQuotesBtn');
+      const quoteListEl = document.getElementById('quoteList');
+
+      const getWeatherBtn = document.getElementById('getWeatherBtn');
+      const resetAllBtn = document.getElementById('resetAllBtn');
+
+      // 新增手动经纬度元素
+      const manualLat = document.getElementById('manualLat');
+      const manualLon = document.getElementById('manualLon');
+      const saveCoordsBtn = document.getElementById('saveCoordsBtn');
+      const clearCoordsBtn = document.getElementById('clearCoordsBtn');
+
+      let lastObjectURL = null;
+      let weatherAutoTimer = null;
+      function revokeLastURL() {
+        if (lastObjectURL) {
+          try {
+            URL.revokeObjectURL(lastObjectURL);
+          } catch (e) {}
+          lastObjectURL = null;
+        }
+      }
+      function safeSetItem(k, v) {
+        try {
+          localStorage.setItem(k, v);
+          return true;
+        } catch (e) {
+          console.warn('localStorage set failed', e);
+          return false;
+        }
+      }
+
+      /* clock */
+      function updateClock() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const weekArr = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+        const w = weekArr[now.getDay()];
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        dateEl.textContent = `${y}-${m}-${d} ${w}`;
+        timeEl.textContent = `${hh}:${mm}:${ss}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      /* drawer open/close */
+      function openDrawer() {
+        drawerMask.classList.add('show');
+        drawerPanel.classList.add('show');
+        drawerMask.setAttribute('aria-hidden', 'false');
+        drawerPanel.setAttribute('aria-hidden', 'false');
+        drawerMask.addEventListener('click', maskClickHandler);
+      }
+      function closeDrawer() {
+        drawerMask.classList.remove('show');
+        drawerPanel.classList.remove('show');
+        drawerMask.setAttribute('aria-hidden', 'true');
+        drawerPanel.setAttribute('aria-hidden', 'true');
+        drawerMask.removeEventListener('click', maskClickHandler);
+      }
+      function maskClickHandler(e) {
+        if (e.target === drawerMask) closeDrawer();
+      }
+      clockEl.addEventListener('click', openDrawer);
+      closeDrawerBtn.addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDrawer();
+      });
+
+      /* background */
+      function applyMode(mode) {
+        if (document.body.style.backgroundImage) {
+          document.body.style.backgroundSize =
+            mode === 'cover' ? 'cover' : 'contain';
+          document.body.style.backgroundRepeat = 'no-repeat';
+          document.body.style.backgroundPosition = 'center center';
+          document.body.style.backgroundColor =
+            mode === 'contain' ? '#000' : 'transparent';
+        }
+        if (bgVideo.style.display !== 'none') {
+          bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
+          document.body.style.backgroundColor =
+            mode === 'contain' ? '#000' : 'transparent';
+        }
+        safeSetItem(KEY_BG_MODE, mode);
+      }
+      (function restoreModeUI() {
+        const saved = localStorage.getItem(KEY_BG_MODE) || 'cover';
+        for (const r of modeRadios) r.checked = r.value === saved;
+        applyMode(saved);
+      })();
+      for (const r of modeRadios) {
+        r.addEventListener('change', () => {
+          const v = document.querySelector(
+            'input[name="bgMode"]:checked'
+          ).value;
+          applyMode(v);
+        });
+      }
+
+      pickImg.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          const dataURL = evt.target.result;
+          revokeLastURL();
+          document.body.style.backgroundImage = `url("${dataURL}")`;
+          const mode = localStorage.getItem(KEY_BG_MODE) || 'cover';
+          document.body.style.backgroundSize =
+            mode === 'cover' ? 'cover' : 'contain';
+          document.body.style.backgroundPosition = 'center center';
+          document.body.style.backgroundRepeat = 'no-repeat';
+          try {
+            bgVideo.pause();
+            bgVideo.removeAttribute('src');
+            bgVideo.load();
+          } catch (e) {}
+          bgVideo.style.display = 'none';
+          if (!safeSetItem(KEY_BG_IMAGE, dataURL)) {
+            alert('图片过大，无法保存到本地，但本次会话仍会显示。');
+            localStorage.removeItem(KEY_BG_IMAGE);
+          } else {
+            localStorage.removeItem(KEY_BG_VIDEO);
+          }
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+      });
+
+      pickVideo.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const maxPersist = 5 * 1024 * 1024;
+        if (file.size <= maxPersist) {
+          const reader = new FileReader();
+          reader.onload = function (evt) {
+            const dataURL = evt.target.result;
+            revokeLastURL();
+            bgVideo.src = dataURL;
+            bgVideo.style.display = 'block';
+            const mode = localStorage.getItem(KEY_BG_MODE) || 'cover';
+            bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
+            bgVideo.muted = true;
+            bgVideo.play().catch(() => {});
+            document.body.style.backgroundImage = '';
+            if (!safeSetItem(KEY_BG_VIDEO, dataURL)) {
+              alert(
+                '视频无法保存到 localStorage（可能过大），但本次会话会播放。'
+              );
+              localStorage.removeItem(KEY_BG_VIDEO);
+            } else {
+              localStorage.removeItem(KEY_BG_IMAGE);
+            }
+          };
+          reader.readAsDataURL(file);
+        } else {
+          revokeLastURL();
+          const url = URL.createObjectURL(file);
+          lastObjectURL = url;
+          bgVideo.src = url;
+          bgVideo.style.display = 'block';
+          const mode = localStorage.getItem(KEY_BG_MODE) || 'cover';
+          bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
+          bgVideo.muted = true;
+          bgVideo.play().catch(() => {});
+          document.body.style.backgroundImage = '';
+          localStorage.removeItem(KEY_BG_VIDEO);
+          localStorage.removeItem(KEY_BG_IMAGE);
+          alert(
+            '视频体积较大（>5MB），无法保存到 localStorage，刷新后将无法恢复该视频。'
+          );
+        }
+        e.target.value = '';
+      });
+
+      function restoreBackground() {
+        const img = localStorage.getItem(KEY_BG_IMAGE);
+        const vid = localStorage.getItem(KEY_BG_VIDEO);
+        const mode = localStorage.getItem(KEY_BG_MODE) || 'cover';
+        if (img) {
+          document.body.style.backgroundImage = `url("${img}")`;
+          document.body.style.backgroundSize =
+            mode === 'cover' ? 'cover' : 'contain';
+          document.body.style.backgroundPosition = 'center center';
+          document.body.style.backgroundRepeat = 'no-repeat';
+          document.body.style.backgroundColor =
+            mode === 'contain' ? '#000' : 'transparent';
+          bgVideo.style.display = 'none';
+        } else if (vid) {
+          bgVideo.src = vid;
+          bgVideo.style.display = 'block';
+          bgVideo.style.objectFit = mode === 'cover' ? 'cover' : 'contain';
+          bgVideo.muted = true;
+          bgVideo.play().catch(() => {});
+          document.body.style.backgroundImage = '';
+          document.body.style.backgroundColor =
+            mode === 'contain' ? '#000' : 'transparent';
+        } else {
+          document.body.style.backgroundImage = '';
+          document.body.style.backgroundColor = '#000';
+          bgVideo.style.display = 'none';
+        }
+      }
+      restoreBackground();
+
+      /* countdown */
+      let countdownTarget = null,
+        countdownRunning = false,
+        countdownInterval = null,
+        pausedRemaining = null;
+      function renderCountdownOnce() {
+        if (!countdownTarget && pausedRemaining == null) {
+          countdownDisplayMain.style.display = 'none';
+          return;
+        }
+        countdownDisplayMain.style.display = 'inline-block';
+        let remaining;
+        if (countdownRunning && countdownTarget)
+          remaining = countdownTarget - Date.now();
+        else if (!countdownRunning && pausedRemaining != null)
+          remaining = pausedRemaining;
+        else if (countdownTarget) remaining = countdownTarget - Date.now();
+        else remaining = 0;
+        if (remaining <= 0) {
+          countdownDisplayMain.textContent = '倒计时结束！';
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          countdownRunning = false;
+          localStorage.removeItem(KEY_COUNTDOWN);
+          return;
+        }
+        const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((remaining / (1000 * 60)) % 60);
+        const secs = Math.floor((remaining / 1000) % 60);
+        countdownDisplayMain.textContent = `剩余 ${days} 天 ${String(
+          hours
+        ).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(
+          secs
+        ).padStart(2, '0')}`;
+      }
+      function startCountdown(ts) {
+        if (!ts || ts <= Date.now()) {
+          alert('请选择未来的目标时间');
+          return;
+        }
+        countdownTarget = ts;
+        pausedRemaining = null;
+        countdownRunning = true;
+        safeSetItem(KEY_COUNTDOWN, String(ts));
+        if (countdownInterval) clearInterval(countdownInterval);
+        renderCountdownOnce();
+        countdownInterval = setInterval(renderCountdownOnce, 1000);
+      }
+      function pauseCountdown() {
+        if (!countdownRunning || !countdownTarget) return;
+        pausedRemaining = countdownTarget - Date.now();
+        countdownRunning = false;
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+        renderCountdownOnce();
+      }
+      function resetCountdown() {
+        if (!confirm('确认重置（清除）倒计时？')) return;
+        countdownTarget = null;
+        pausedRemaining = null;
+        countdownRunning = false;
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+        localStorage.removeItem(KEY_COUNTDOWN);
+        renderCountdownOnce();
+      }
+      startCountdownBtn.addEventListener('click', () => {
+        const val = countdownPicker.value;
+        if (!val && pausedRemaining == null) {
+          alert('请选择目标时间或恢复已暂停的倒计时');
+          return;
+        }
+        if (pausedRemaining != null && !val) {
+          countdownTarget = Date.now() + pausedRemaining;
+          pausedRemaining = null;
+          countdownRunning = true;
+          if (countdownInterval) clearInterval(countdownInterval);
+          countdownInterval = setInterval(renderCountdownOnce, 1000);
+          renderCountdownOnce();
+          closeDrawer();
+          return;
+        }
+        const ts = new Date(val).getTime();
+        startCountdown(ts);
+        closeDrawer();
+        countdownPicker.value = '';
+      });
+      pauseCountdownBtn.addEventListener('click', pauseCountdown);
+      resetCountdownBtn.addEventListener('click', resetCountdown);
+      function restoreCountdown() {
+        const saved = localStorage.getItem(KEY_COUNTDOWN);
+        if (saved) {
+          const ts = Number(saved);
+          if (!isNaN(ts) && ts > Date.now()) {
+            countdownTarget = ts;
+            countdownRunning = true;
+            renderCountdownOnce();
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(renderCountdownOnce, 1000);
+            countdownPicker.value = new Date(ts).toISOString().slice(0, 16);
+          } else {
+            localStorage.removeItem(KEY_COUNTDOWN);
+          }
+        }
+      }
+      restoreCountdown();
+
+      /* quotes */
+      function loadQuotes() {
+        const raw = localStorage.getItem(KEY_QUOTES);
+        if (!raw) return [];
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          return [];
+        }
+      }
+      function saveQuotes(arr) {
+        safeSetItem(KEY_QUOTES, JSON.stringify(arr));
+      }
+      function renderQuoteList() {
+        const arr = loadQuotes();
+        quoteListEl.innerHTML = '';
+        if (arr.length === 0) {
+          quoteListEl.innerHTML =
+            '<div class="muted" style="margin-top:8px;">当前无励志语，添加几条吧。</div>';
+          return;
+        }
+        arr.forEach((q, idx) => {
+          const item = document.createElement('div');
+          item.className = 'quote-item';
+          const t = document.createElement('div');
+          t.className = 'text';
+          t.textContent = q;
+          item.appendChild(t);
+          const up = document.createElement('button');
+          up.textContent = '↑';
+          up.title = '上移';
+          const down = document.createElement('button');
+          down.textContent = '↓';
+          down.title = '下移';
+          const del = document.createElement('button');
+          del.textContent = '✕';
+          del.title = '删除';
+          item.appendChild(up);
+          item.appendChild(down);
+          item.appendChild(del);
+          up.addEventListener('click', () => {
+            if (idx === 0) return;
+            const arr = loadQuotes();
+            [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+            saveQuotes(arr);
+            renderQuoteList();
+          });
+          down.addEventListener('click', () => {
+            const arr = loadQuotes();
+            if (idx === arr.length - 1) return;
+            [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
+            saveQuotes(arr);
+            renderQuoteList();
+          });
+          del.addEventListener('click', () => {
+            if (!confirm('确认删除该励志语？')) return;
+            const arr = loadQuotes();
+            arr.splice(idx, 1);
+            saveQuotes(arr);
+            renderQuoteList();
+          });
+          quoteListEl.appendChild(item);
+        });
+      }
+      renderQuoteList();
+      addQuoteBtn.addEventListener('click', () => {
+        const txt = newQuoteText.value.trim();
+        if (!txt) {
+          alert('请输入励志语');
+          return;
+        }
+        const arr = loadQuotes();
+        arr.push(txt);
+        saveQuotes(arr);
+        newQuoteText.value = '';
+        renderQuoteList();
+        startQuoteCycleOnce();
+      });
+      clearQuotesBtn.addEventListener('click', () => {
+        if (!confirm('确认清空所有励志语？')) return;
+        saveQuotes([]);
+        renderQuoteList();
+        stopQuoteCycle();
+        quoteBox.textContent = '';
+      });
+
+      let quoteCyclePromise = null;
+      let quoteCycleActive = true;
+      const TYPING_SPEED = 40,
+        ERASING_SPEED = 20,
+        PAUSE_AFTER_TYPE = 1800,
+        PAUSE_AFTER_ERASE = 300;
+      function typeText(element, text) {
+        return new Promise((res) => {
+          element.textContent = '';
+          let i = 0;
+          function step() {
+            if (!quoteCycleActive) {
+              res();
+              return;
+            }
+            if (i <= text.length - 1) {
+              element.textContent += text.charAt(i);
+              i++;
+              setTimeout(step, TYPING_SPEED);
+            } else res();
+          }
+          step();
+        });
+      }
+      function eraseText(element) {
+        return new Promise((res) => {
+          let s = element.textContent || '';
+          let i = s.length;
+          function step() {
+            if (!quoteCycleActive) {
+              res();
+              return;
+            }
+            if (i > 0) {
+              element.textContent = s.substring(0, i - 1);
+              i--;
+              setTimeout(step, ERASING_SPEED);
+            } else res();
+          }
+          step();
+        });
+      }
+      async function quoteCycleLoop() {
+        quoteCycleActive = true;
+        const arr = loadQuotes();
+        if (!arr || arr.length === 0) {
+          quoteBox.textContent = '';
+          return;
+        }
+        let idx = 0;
+        while (quoteCycleActive) {
+          const cur = loadQuotes();
+          if (!cur || cur.length === 0) {
+            quoteBox.textContent = '';
+            break;
+          }
+          if (idx >= cur.length) idx = 0;
+          const text = cur[idx];
+          await typeText(quoteBox, text);
+          if (!quoteCycleActive) break;
+          await new Promise((r) => setTimeout(r, PAUSE_AFTER_TYPE));
+          if (!quoteCycleActive) break;
+          await eraseText(quoteBox);
+          if (!quoteCycleActive) break;
+          await new Promise((r) => setTimeout(r, PAUSE_AFTER_ERASE));
+          idx++;
+        }
+        quoteCyclePromise = null;
+      }
+      function startQuoteCycleOnce() {
+        if (quoteCyclePromise) return;
+        quoteCyclePromise = (async () => {
+          try {
+            await quoteCycleLoop();
+          } catch (e) {
+            console.warn(e);
+          }
+          quoteCyclePromise = null;
+        })();
+      }
+      function stopQuoteCycle() {
+        quoteCycleActive = false;
+        quoteCyclePromise = null;
+      }
+      if (loadQuotes().length > 0) startQuoteCycleOnce();
+
+      /* weather */
+      const PUBLIC_WEATHER_ID = '88888888';
+      const PUBLIC_WEATHER_KEY = '88888888';
+
+      function extractWeatherSummary(json) {
+        const result = {
+          city: null,
+          temp: null,
+          desc: null,
+          humidity: null,
+          wind: null,
+          icon: null,
+          raw: json,
+        };
+        function walk(obj) {
+          if (!obj || typeof obj !== 'object') return;
+          for (const k of Object.keys(obj)) {
+            const v = obj[k];
+            const key = k.toLowerCase();
+            if (
+              !result.city &&
+              (key.includes('city') ||
+                key.includes('name') ||
+                key.includes('location') ||
+                key.includes('addr') ||
+                key.includes('county'))
+            ) {
+              if (typeof v === 'string') result.city = v;
+            }
+            if (
+              !result.temp &&
+              (key.includes('temp') ||
+                key.includes('tem') ||
+                key.includes('wendu') ||
+                key.includes('temperature'))
+            ) {
+              if (typeof v === 'number' || typeof v === 'string')
+                result.temp = v;
+            }
+            if (
+              !result.desc &&
+              (key.includes('wea') ||
+                key.includes('weather') ||
+                key.includes('desc') ||
+                key.includes('text') ||
+                key.includes('info'))
+            ) {
+              if (typeof v === 'string') result.desc = v;
+            }
+            if (
+              !result.humidity &&
+              (key.includes('humidity') || key.includes('shidu'))
+            ) {
+              if (typeof v === 'number' || typeof v === 'string')
+                result.humidity = v;
+            }
+            if (
+              !result.wind &&
+              (key.includes('wind') || key.includes('feng'))
+            ) {
+              if (typeof v === 'string') result.wind = v;
+            }
+            if (
+              !result.icon &&
+              (key.includes('icon') ||
+                key.includes('img') ||
+                key.includes('pict') ||
+                key.includes('image'))
+            ) {
+              if (typeof v === 'string') result.icon = v;
+            }
+            if (typeof v === 'object') walk(v);
+          }
+        }
+        walk(json);
+        return result;
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(
+          /[&<>"']/g,
+          (m) =>
+            ({
+              '&': '&amp;',
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              "'": '&#39;',
+            }[m])
+        );
+      }
+
+      function showWeatherSummary(summary) {
+        if (!summary) {
+          weatherBox.style.display = 'none';
+          return;
+        }
+        const pieces = [];
+        if (summary.city)
+          pieces.push(`<strong>${escapeHtml(String(summary.city))}</strong>`);
+        if (summary.temp != null)
+          pieces.push(`${escapeHtml(String(summary.temp))} ℃`);
+        if (summary.desc) pieces.push(escapeHtml(String(summary.desc)));
+        if (summary.humidity)
+          pieces.push(`湿度: ${escapeHtml(String(summary.humidity))}`);
+        if (summary.wind)
+          pieces.push(`风: ${escapeHtml(String(summary.wind))}`);
+        weatherSummary.innerHTML = pieces.join(' · ');
+        if (summary.icon) {
+          weatherIcon.src = summary.icon;
+          weatherIcon.style.display = 'inline-block';
+        } else {
+          weatherIcon.style.display = 'none';
+        }
+        weatherBox.style.display = 'flex';
+      }
+
+      async function fetchWeatherWithCoords(lat, lon) {
+        const base = 'https://cn.apihz.cn/api/tianqi/tqybjw1.php';
+        const url = `${base}?id=${encodeURIComponent(
+          PUBLIC_WEATHER_ID
+        )}&key=${encodeURIComponent(
+          PUBLIC_WEATHER_KEY
+        )}&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
+        weatherRawPre.textContent = '请求中...';
+        try {
+          const resp = await fetch(url);
+          if (!resp.ok) throw new Error('网络错误: ' + resp.status);
+          const data = await resp.json();
+          weatherRawPre.textContent = JSON.stringify(data, null, 2);
+          safeSetItem(
+            KEY_WEATHER_LAST,
+            JSON.stringify({ ts: Date.now(), query: { lat, lon }, data })
+          );
+          safeSetItem(KEY_WEATHER_COORDS, JSON.stringify({ lat, lon }));
+          updateSavedCoordsUI();
+          updateLastFetchUI();
+          const summary = extractWeatherSummary(data);
+          showWeatherSummary(summary);
+          return { ok: true, data };
+        } catch (err) {
+          console.error('fetchWeather error', err);
+          weatherRawPre.textContent = '请求失败: ' + err.message;
+          showWeatherSummary(null);
+          return { ok: false, error: err };
+        }
+      }
+
+      function getWeatherHandler() {
+        if (!navigator.geolocation) {
+          alert('当前浏览器不支持定位，请手动获取经纬度');
+          return;
+        }
+
+        weatherRawPre.textContent = '正在获取设备定位...';
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            weatherRawPre.textContent = `已获取定位：lat=${lat}, lon=${lon}，正在请求天气接口...`;
+            await fetchWeatherWithCoords(lat, lon);
+            // 同步填入手动输入框
+            try { manualLat.value = String(lat); manualLon.value = String(lon); } catch(e){}
+          },
+          (err) => {
+            console.warn('定位失败', err);
+            weatherRawPre.textContent =
+              '定位失败: ' + (err.message || err.code);
+            alert(
+              '定位失败：' +
+                (err.message || err.code) +
+                '。请允许定位或稍后重试。'
+            );
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      }
+      getWeatherBtn.addEventListener('click', getWeatherHandler);
+
+      // 保存并使用手动经纬度
+      saveCoordsBtn.addEventListener('click', async () => {
+        const lat = parseFloat(manualLat.value);
+        const lon = parseFloat(manualLon.value);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+          alert('请输入有效的经纬度（数字）');
+          return;
+        }
+        safeSetItem(KEY_WEATHER_COORDS, JSON.stringify({ lat, lon }));
+        updateSavedCoordsUI();
+        weatherRawPre.textContent = `手动保存：lat=${lat}, lon=${lon}，正在请求天气接口...`;
+        await fetchWeatherWithCoords(lat, lon);
+        closeDrawer();
+      });
+
+      // 清除已保存经纬度
+      clearCoordsBtn.addEventListener('click', () => {
+        if (!confirm('确认清除已保存的经纬度？')) return;
+        localStorage.removeItem(KEY_WEATHER_COORDS);
+        updateSavedCoordsUI();
+        manualLat.value = '';
+        manualLon.value = '';
+        alert('已清除保存的经纬度');
+      });
+
+      async function fetchWeatherAutoOnce() {
+        const coordsRaw = localStorage.getItem(KEY_WEATHER_COORDS);
+        if (coordsRaw) {
+          try {
+            const obj = JSON.parse(coordsRaw);
+            if (
+              obj &&
+              typeof obj.lat === 'number' &&
+              typeof obj.lon === 'number'
+            ) {
+              await fetchWeatherWithCoords(obj.lat, obj.lon);
+              // 填入手动输入框
+              try { manualLat.value = String(obj.lat); manualLon.value = String(obj.lon); } catch(e){}
+              return;
+            }
+          } catch (e) {}
+        }
+        if (!navigator.geolocation) {
+          console.warn('无法自动刷新：浏览器不支持定位且无已保存经纬度');
+          return;
+        }
+        try {
+          const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            });
+          });
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          // 填入手动输入框
+          try { manualLat.value = String(lat); manualLon.value = String(lon); } catch(e){}
+          await fetchWeatherWithCoords(lat, lon);
+        } catch (err) {
+          console.warn('自动刷新定位失败', err);
+        }
+      }
+
+      function startAutoWeatherHourly() {
+        if (weatherAutoTimer) clearInterval(weatherAutoTimer);
+        // 立即执行一次
+        fetchWeatherAutoOnce();
+        // 每 60 分钟刷新一次
+        weatherAutoTimer = setInterval(fetchWeatherAutoOnce, 60 * 60 * 1000);
+      }
+
+      function updateSavedCoordsUI() {
+        const s = localStorage.getItem(KEY_WEATHER_COORDS);
+        if (!s) {
+          savedCoordsEl.textContent = '（尚未保存）';
+          return;
+        }
+        try {
+          const obj = JSON.parse(s);
+          savedCoordsEl.textContent = `lat=${obj.lat}, lon=${obj.lon}`;
+        } catch (e) {
+          savedCoordsEl.textContent = '（解析失败）';
+        }
+      }
+      function updateLastFetchUI() {
+        const lastRaw = localStorage.getItem(KEY_WEATHER_LAST);
+        if (!lastRaw) {
+          weatherLastEl.textContent = '（尚未刷新）';
+          return;
+        }
+        try {
+          const parsed = JSON.parse(lastRaw);
+          const ts = parsed.ts || Date.now();
+          const d = new Date(ts);
+          weatherLastEl.textContent = `${d.getFullYear()}-${String(
+            d.getMonth() + 1
+          ).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(
+            d.getHours()
+          ).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        } catch (e) {
+          weatherLastEl.textContent = '（解析失败）';
+        }
+      }
+
+      (function restoreWeatherUI() {
+        const last = localStorage.getItem(KEY_WEATHER_LAST);
+        if (last) {
+          try {
+            const parsed = JSON.parse(last);
+            weatherRawPre.textContent = JSON.stringify(parsed.data, null, 2);
+            const summary = extractWeatherSummary(parsed.data);
+            showWeatherSummary(summary);
+          } catch (e) {
+            weatherRawPre.textContent = '尚未获取';
+          }
+        } else weatherRawPre.textContent = '尚未获取';
+        updateSavedCoordsUI();
+        updateLastFetchUI();
+        // 如果已有已保存经纬度，把它填入输入框
+        try {
+          const coordsRaw = localStorage.getItem(KEY_WEATHER_COORDS);
+          if (coordsRaw) {
+            const c = JSON.parse(coordsRaw);
+            if (c && typeof c.lat === 'number' && typeof c.lon === 'number') {
+              manualLat.value = String(c.lat);
+              manualLon.value = String(c.lon);
+            }
+          }
+        } catch (e) {}
+        // 启动每小时自动刷新（若用户之前已保存 coords 则会立即刷新一次；否则等待用户首次允许定位）
+        startAutoWeatherHourly();
+      })();
+
+      /* restore all & reset */
+      (function restoreAll() {
+        restoreBackground();
+        restoreCountdown();
+        renderQuoteList();
+        if (loadQuotes().length > 0) startQuoteCycleOnce();
+      })();
+
+      resetAllBtn.addEventListener('click', () => {
+        if (
+          !confirm(
+            '确认重置所有设置？这将清除背景、倒计时、励志语、天气缓存与展示模式。'
+          )
+        )
+          return;
+        localStorage.removeItem(KEY_BG_IMAGE);
+        localStorage.removeItem(KEY_BG_VIDEO);
+        localStorage.removeItem(KEY_BG_MODE);
+        localStorage.removeItem(KEY_COUNTDOWN);
+        localStorage.removeItem(KEY_QUOTES);
+        localStorage.removeItem(KEY_WEATHER_COORDS);
+        localStorage.removeItem(KEY_WEATHER_LAST);
+        try {
+          bgVideo.pause();
+          bgVideo.removeAttribute('src');
+          bgVideo.load();
+        } catch (e) {}
+        bgVideo.style.display = 'none';
+        revokeLastURL();
+        document.body.style.backgroundImage = '';
+        document.body.style.backgroundColor = '#000';
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+        countdownTarget = null;
+        pausedRemaining = null;
+        countdownRunning = false;
+        countdownDisplayMain.style.display = 'none';
+        stopQuoteCycle();
+        saveQuotes([]);
+        renderQuoteList();
+        quoteBox.textContent = '';
+        weatherRawPre.textContent = '尚未获取';
+        weatherBox.style.display = 'none';
+        savedCoordsEl.textContent = '（尚未保存）';
+        weatherLastEl.textContent = '（尚未刷新）';
+        if (weatherAutoTimer) {
+          clearInterval(weatherAutoTimer);
+          weatherAutoTimer = null;
+        }
+        manualLat.value = '';
+        manualLon.value = '';
+        for (const r of modeRadios) r.checked = r.value === 'cover';
+        safeSetItem(KEY_BG_MODE, 'cover');
+        closeDrawer();
+        alert('已重置所有设置为默认。');
+      });
+
+      window.addEventListener('beforeunload', () => {
+        revokeLastURL();
+        if (weatherAutoTimer) clearInterval(weatherAutoTimer);
+      });
+    </script>
+  </body>
+</html>
