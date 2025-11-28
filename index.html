@@ -40,10 +40,11 @@
         background: transparent;
       }
 
+      /* 时钟：使用 vw/vh 和 clamp 保持可读性 */
       #clock {
         position: absolute;
-        left: 5%;
-        top: 8%;
+        left: 5vw;
+        top: 6.5vh;
         text-align: center;
         color: #fff;
         z-index: 2;
@@ -51,14 +52,15 @@
         user-select: none;
       }
       #clock .date {
-        font-size: 1.2rem;
+        font-size: clamp(0.9rem, 1.6vw, 1.6rem);
         opacity: 0.95;
         letter-spacing: 0.08em;
       }
       #clock .time {
-        font-size: 6rem;
-        margin-top: 6px;
+        font-size: clamp(2rem, 7vw, 7rem); /* 随视口宽度缩放 */
+        margin-top: 0.6vh;
         letter-spacing: 0.04em;
+        line-height: 0.95;
       }
 
       #overlayText {
@@ -119,16 +121,16 @@
         pointer-events: auto;
       }
       .countdown-card {
-        min-width: 300px;
-        max-width: 500px;
+        min-width: 18vw;
+        max-width: 30vw;
         background: rgba(0, 0, 0, 0.55);
         color: #fff;
-        padding: 8px 12px;
+        padding: 12px 12px;
         border-radius: 10px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         border-left: 6px solid transparent;
       }
       .countdown-card .meta {
@@ -138,7 +140,7 @@
       }
       .countdown-card .label {
         font-weight: 700;
-        font-size: 14px;
+        font-size: 1rem;
       }
       .countdown-card .time {
         font-family: monospace;
@@ -337,7 +339,7 @@
       }
       /* 全屏按钮样式 */
       #fullscreenBtn {
-         position: absolute;
+        position: absolute;
         top: 12px;
         right: 60px;
         width: 36px;
@@ -499,14 +501,13 @@
         aria-modal="true"
         aria-hidden="true"
       >
-       
         <button id="closeDrawerBtn" class="close-btn" aria-label="关闭设置">
           ✕
         </button>
         <h2 style="margin-bottom: 6px">
           设置（背景 / 倒计时 / 励志语 / 天气）
         </h2>
-         <button id="fullscreenBtn"  title="切换全屏">切换全屏</button>
+        <button id="fullscreenBtn" title="切换全屏">切换全屏</button>
 
         <div class="drawer-section">
           <h3>背景</h3>
@@ -968,7 +969,10 @@
       });
 
       applyBgVideoUrlBtn.addEventListener('click', () => {
-        const url = (bgVideoUrlInput.value || 'https://wisdomhallsup.oss-cn-beijing.aliyuncs.com/798.mp4').trim();
+        const url = (
+          bgVideoUrlInput.value ||
+          'https://wisdomhallsup.oss-cn-beijing.aliyuncs.com/798.mp4'
+        ).trim();
         if (!url) {
           alert('请输入视频 URL');
           return;
