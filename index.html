@@ -89,7 +89,6 @@
         color: #fff;
         margin-left: 2.6vw;
         pointer-events: auto;
-        
       }
 
       /* 多倒计时右上角列表 */
@@ -370,17 +369,18 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
-  min-width: 86px;
+  gap: 0.11vw;
+  min-width: 4.45vw;
 }
 .wb-current-temp {
  
   /* responsive big number */
-  font-size: 25px;
+  font-size: 1.3vw;
   line-height: 1;
 }
 .wb-current-desc {
-  font-size: 14px;
+  margin-top: 0.2vw;
+  font-size: 0.73vw;
   opacity: 0.95;
 }
 
@@ -404,14 +404,14 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
-  min-width: 120px;
-  padding-top: 4px;
+  gap: 0.1vw;
+  min-width: 6.25vw;
+  padding-top: 0.20vw;
 }
 
 .wb-tomorrow-desc {
-  margin-top: 4px;
-  font-size: 14px;
+  margin-top: 0.19vw;
+  font-size: 0.72vw;
   opacity: 0.95;
 }
 
@@ -421,13 +421,12 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 6px;
-  gap: 8px;
+  margin-top: 0.31vw;
+  gap: 0.4vw;
   font-size: clamp(11px, 1.6vw, 13px);
 }
-.wb-city-aqi { display:flex; gap:8px; align-items:center; color:#fff; }
-.wb-aqi { color:#2ee39a; font-weight:700; }
-.wb-phrase { opacity:0.9; }
+.wb-city-aqi { display:flex; gap:0.4vw; align-items:center; color:#fff; }
+
 
     </style>
   </head>
@@ -1722,10 +1721,10 @@
 
         const html = `
           <div style="width:100%">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:0.41vw;flex-wrap:wrap">
               <div class="wb-left">
-                <div class="wb-current-temp">${currentTemp !== '' ? currentTemp + '°C' : '—'} <span style="font-size:16px">${escapeHtml(currentDesc || '')}</span> </div>
-                <div class="wb-current-desc">${escapeHtml(city || '')} <span style="margin-left:5px;">${escapeHtml(aqiNum || '')}</span> </div>
+                <div class="wb-current-temp">${currentTemp !== '' ? currentTemp + '°C' : '—'} <span style="font-size:0.83vw">${escapeHtml(currentDesc || '')}</span> </div>
+                <div class="wb-current-desc">${escapeHtml(city || '')} <span style="margin-left:0.26vw;">${escapeHtml(aqiNum || '')}</span> </div>
               </div>
 
              
