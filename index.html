@@ -79,7 +79,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.22);
+        background: rgba(0, 0, 0, 0.10);
         z-index: -1;
         pointer-events: none;
       }
@@ -161,12 +161,6 @@
         text-align: center;
         padding: 12px 18px;
         border-radius: 8px;
-        background: linear-gradient(
-          90deg,
-          rgba(255, 255, 255, 0.04),
-          rgba(255, 255, 255, 0.02)
-        );
-        box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
         line-height: 1.35;
         pointer-events: auto;
         min-height: 48px;
@@ -656,8 +650,7 @@
             >
           </div>
           <div class="muted">
-            图片保存到 localStorage（可能失败）。视频 ≤5MB 保存到
-            localStorage，>5MB 刷新后不可恢复。
+            
           </div>
         </div>
 
@@ -703,8 +696,7 @@
             <button id="addCountdownBtn" class="small">添加</button>
           </div>
           <div class="muted" style="margin-top: 8px">
-            添加后会出现在右上角列表，页面刷新后自动恢复（保存在
-            localStorage）。
+            添加后会出现在右上角列表，页面刷新后自动恢复
           </div>
 
           <div style="margin-top: 10px">
@@ -714,7 +706,7 @@
         </div>
 
         <div class="drawer-section">
-          <h3>励志语（打字机效果）</h3>
+          <h3>励志语</h3>
           <textarea
             id="newQuoteText"
             rows="2"
@@ -1538,10 +1530,10 @@
 
       let quoteCyclePromise = null;
       let quoteCycleActive = true;
-      const TYPING_SPEED = 40,
-        ERASING_SPEED = 20,
-        PAUSE_AFTER_TYPE = 1800,
-        PAUSE_AFTER_ERASE = 300;
+      const TYPING_SPEED = 50,
+        ERASING_SPEED = 25,
+        PAUSE_AFTER_TYPE = 5800,
+        PAUSE_AFTER_ERASE = 500;
       function typeText(element, text) {
         return new Promise((res) => {
           element.textContent = '';
