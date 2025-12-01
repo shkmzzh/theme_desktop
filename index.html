@@ -53,14 +53,13 @@
         user-select: none;
       }
       #clock .date {
-        font-size: clamp(0.9rem, 1.6vw, 1.6rem);
+        font-size: clamp(0.7rem, 1.2vw, 1.2rem);
         opacity: 0.95;
         letter-spacing: 0.08em;
         text-align: center;
       }
       #clock .time {
         font-size: clamp(2rem, 7vw, 7rem); /* 随视口宽度缩放 */
-        margin-top: 0.6vh;
         letter-spacing: 0.04em;
         line-height: 0.95;
       }
@@ -88,10 +87,9 @@
       #weatherBox {
         display: none;
         color: #fff;
-       
-        
+        margin-left: 2.6vw;
         pointer-events: auto;
-        border: 1px solid red;
+        
       }
 
       /* 多倒计时右上角列表 */
@@ -298,8 +296,6 @@
       /* weather svg */
       svg.weather-svg {
         display: none;
-        width: 56px;
-        height: 56px;
         vertical-align: middle;
         transition: opacity 300ms ease, transform 300ms ease;
         opacity: 0;
@@ -410,12 +406,12 @@
   align-items: flex-end;
   gap: 2px;
   min-width: 120px;
+  padding-top: 4px;
 }
-.wb-tomorrow-temp {
- 
-  
-}
+
 .wb-tomorrow-desc {
+  margin-top: 4px;
+  font-size: 14px;
   opacity: 0.95;
 }
 
@@ -442,7 +438,7 @@
       <div class="date"></div>
       <div class="time"></div>
 
-      <div style="display: flex; justify-content: center; align-items: center; border: 1px solid red;">
+      <div style="display: flex; justify-content: center; align-items: center;  margin-top: 10px;">
  <!-- weather svgs -->
       <svg class="weather-svg sunshine" aria-hidden="true" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="4" fill="#FFD54A"></circle>
@@ -1720,7 +1716,7 @@
           tomorrowDesc = tomorrow.day_weather_short || tomorrow.day_weather || tomorrow.night_weather_short || '';
         }
 
-        const city = dataJson.getcity || dataJson.city || (today && (today.city || '')) || '';
+        const city = dataJson.county || dataJson.county || (today && (today.county || '')) || '';
         const aqiNum = today && (today.day_wind_direction != null ? today.day_wind_direction : null);
         const aqiName = today && today.aqi_name ? today.aqi_name : (summary.aqiName || '');
 
@@ -1729,7 +1725,7 @@
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
               <div class="wb-left">
                 <div class="wb-current-temp">${currentTemp !== '' ? currentTemp + '°C' : '—'} <span style="font-size:16px">${escapeHtml(currentDesc || '')}</span> </div>
-                <div class="wb-current-desc">${escapeHtml(city || '')} ${escapeHtml(aqiNum || '')}</div>
+                <div class="wb-current-desc">${escapeHtml(city || '')} <span style="margin-left:5px;">${escapeHtml(aqiNum || '')}</span> </div>
               </div>
 
              
