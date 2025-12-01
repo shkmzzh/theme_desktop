@@ -2270,35 +2270,101 @@ svg {
         }
       }
 
-      async function fetchWeatherWithIP(ip) {
-        const base = 'https://cn.apihz.cn/api/tianqi/tengxunip.php';
-        const url = `${base}?id=${encodeURIComponent(PUBLIC_WEATHER_ID)}&key=${encodeURIComponent(PUBLIC_WEATHER_KEY)}&ip=${encodeURIComponent(ip)}`;
-        weatherRawPre.textContent = '请求中...';
-        try {
-          const resp = await fetch(url);
-          if (!resp.ok) throw new Error('网络错误: ' + resp.status);
-          const data = await resp.json();
-          if(data.code == 200){
-             weatherRawPre.textContent = JSON.stringify(data, null, 2);
-          safeSetItem(KEY_WEATHER_LAST, JSON.stringify({ ts: Date.now(), query: { ip }, data }));
-          safeSetItem(KEY_WEATHER_IP, ip);
-          updateSavedIpUI(); updateLastFetchUI();
-          const summary = extractWeatherSummary(data);
-          showWeatherSummary(summary);
-          if (typeof showSvgFromSummary === 'function') showSvgFromSummary(summary);
-          // 新增：渲染详细天气布局（当前温度 + 明天温度）
-          renderWeatherBoxFromApi(data);
-          }
-         
-          return { ok:true, data };
-        } catch (err) {
-          console.error('fetchWeather error', err);
-          weatherRawPre.textContent = '请求失败: ' + err.message;
-          showWeatherSummary(null);
-          if (typeof hideAllWeatherSVG === 'function') hideAllWeatherSVG();
-          return { ok:false, error:err };
-        }
-      }
+     async function fetchWeatherWithIP(ip) {
+  const base = 'https://cn.apihz.cn/api/tianqi/tengxunip.php';
+  const url = `${base}?id=${encodeURIComponent(PUBLIC_WEATHER_ID)}&key=${encodeURIComponent(PUBLIC_WEATHER_KEY)}&ip=${encodeURIComponent(ip)}`;
+
+  weatherRawPre.textContent = '请求中...';
+
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('网络错误: ' + resp.status);
+    const data = await resp.json();
+
+    // ============ 情况 1：API 正常返回 ============
+    if (data.code == 200) {
+      // 显示原始数据
+      weatherRawPre.textContent = JSON.stringify(data, null, 2);
+
+      // 保存到本地缓存
+      safeSetItem(
+        KEY_WEATHER_LAST,
+        JSON.stringify({
+          ts: Date.now(),
+          query: { ip },
+          data
+        })
+      );
+      safeSetItem(KEY_WEATHER_IP, ip);
+
+      updateSavedIpUI();
+      updateLastFetchUI();
+
+      // 渲染天气摘要
+      const summary = extractWeatherSummary(data);
+      showWeatherSummary(summary);
+      if (typeof showSvgFromSummary === "function") showSvgFromSummary(summary);
+
+      // 渲染天气 Box（当前温度 + 明天温度）
+      renderWeatherBoxFromApi(data);
+
+      return { ok: true, data };
+    }
+
+    // ============ 情况 2：API 返回，但 code != 200 ============
+    console.warn("天气 API 返回异常 code:", data.code);
+
+    const last = safeGetItem(KEY_WEATHER_LAST);
+    if (last) {
+      const cached = JSON.parse(last);
+
+      weatherRawPre.textContent =
+        `（使用本地缓存：API code=${data.code}）\n\n` +
+        JSON.stringify(cached.data, null, 2);
+
+      const summary = extractWeatherSummary(cached.data);
+      showWeatherSummary(summary);
+      if (typeof showSvgFromSummary === "function") showSvgFromSummary(summary);
+      renderWeatherBoxFromApi(cached.data);
+
+      return { ok: true, data: cached.data, cached: true };
+    }
+
+    // 没有缓存可用 → 显示错误
+    weatherRawPre.textContent = "API 返回错误且无缓存可用。";
+    showWeatherSummary(null);
+    if (typeof hideAllWeatherSVG === "function") hideAllWeatherSVG();
+
+    return { ok: false, error: "API code != 200 且无缓存" };
+
+  } catch (err) {
+    // ============ 情况 3：网络异常 ============
+    console.error("fetchWeather error", err);
+    weatherRawPre.textContent = "请求失败: " + err.message;
+
+    const last = safeGetItem(KEY_WEATHER_LAST);
+    if (last) {
+      const cached = JSON.parse(last);
+
+      weatherRawPre.textContent =
+        `（使用本地缓存：网络错误）\n\n` +
+        JSON.stringify(cached.data, null, 2);
+
+      const summary = extractWeatherSummary(cached.data);
+      showWeatherSummary(summary);
+      if (typeof showSvgFromSummary === "function") showSvgFromSummary(summary);
+      renderWeatherBoxFromApi(cached.data);
+
+      return { ok: true, data: cached.data, cached: true };
+    }
+
+    // 没有缓存
+    showWeatherSummary(null);
+    if (typeof hideAllWeatherSVG === "function") hideAllWeatherSVG();
+    return { ok: false, error: err };
+  }
+}
+
 
       async function detectPublicIp() {
         try {
