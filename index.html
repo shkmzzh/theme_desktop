@@ -8,6 +8,40 @@
     </title>
     <!-- <link rel="stylesheet" href="./index.css" /> -->
     <style>
+      :root { --main-text-color: #ffffff; }
+      .palette-container {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:12px;
+    padding-top:6px;
+    border-top:1px dashed #e6e6e6;
+  }
+  .palette-label { font-size:14px; font-weight:600; color:#333; margin-right:6px; min-width:78px; }
+
+  /* color input 的尺寸（使用 vw/vh 适配大屏） */
+  #colorPicker {
+    width:6.2vh; height:3.8vh; border:0; padding:0;
+    -webkit-appearance:none; appearance:none; cursor:pointer;
+    border-radius:6px;
+  }
+   .palette-btn.apply { background:#409eff; color:#fff; border-color:transparent; }
+  .palette-btn.reset { background:#f56c6c; color:#fff; border-color:transparent; }
+
+  /* 预览文本（小块） */
+  .palette-preview {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:84px;
+    height:36px;
+    padding:6px 10px;
+    border-radius:6px;
+    background:rgba(0,0,0,0.06);
+    border:1px solid rgba(0,0,0,0.04);
+    font-size:13px;
+    color:#222;
+  }
       html,
       body {
         height: 100%;
@@ -937,6 +971,28 @@ svg {
   }
 }
 
+ /* ========== 覆盖页面“主屏文字”样式（使用 CSS 变量） ========== */
+  /* 重点：使用 !important 确保能覆盖已写死的颜色样式（仅用于“主屏文字”） */
+  #clock,
+  #clock .date,
+  #clock .time,
+  #quoteBox,
+  #quoteBox * {
+    color: var(--main-text-color) !important;
+  }
+
+  .countdown-card,
+  .countdown-card .label,
+  .countdown-card .time,
+  .countdown-card .actions .icon-btn {
+    color: var(--main-text-color) !important;
+  }
+
+  #weatherBox,
+  #weatherBox * {
+    color: var(--main-text-color) !important;
+  }
+
     </style>
   </head>
   <body>
@@ -1306,6 +1362,20 @@ svg {
             <pre id="weatherRaw">尚未获取</pre>
           </div>
         </div>
+
+         <div class="palette-container" id="paletteContainer" role="region" aria-label="文字颜色调色板">
+  <div class="palette-label">文字颜色</div>
+
+  <!-- 颜色选择器 -->
+  <input id="colorPicker" type="color" value="#ffffff" aria-label="选择文字颜色" />
+
+  <!-- 应用/重置按钮 -->
+  <button id="applyColorBtn" class="palette-btn apply" title="应用所选颜色">应用</button>
+  <button id="resetColorBtn" class="palette-btn reset" title="重置为默认白色">重置</button>
+
+  <!-- 预览 -->
+  <div class="palette-preview" id="palettePreview">预览文字</div>
+  </div>
 
         <div class="drawer-section">
           <h3>重置</h3>
@@ -2627,6 +2697,81 @@ svg {
         // 初始同步（如果页面已在全屏）
         syncFullUI();
       })();
+
+      (function(){
+    // 本地存储键
+    const KEY_MAIN_COLOR = 'app_main_text_color';
+
+    // 元素
+    const colorPicker = document.getElementById('colorPicker');
+    const applyBtn = document.getElementById('applyColorBtn');
+    const resetBtn = document.getElementById('resetColorBtn');
+    const preview = document.getElementById('palettePreview');
+
+    // 安全的 localStorage helpers（尽量复用你原来的 safeSetItem）
+    function safeSetItem(k, v) {
+      try { localStorage.setItem(k, String(v)); return true; } catch (e) { console.warn('safeSetItem fail', e); return false; }
+    }
+    function safeGetItem(k) {
+      try { return localStorage.getItem(k); } catch (e) { console.warn('safeGetItem fail', e); return null; }
+    }
+
+    // 应用颜色（可选择是否保存）
+    function applyMainColor(color, save = false) {
+      if (!color) return;
+      const normalized = String(color).trim();
+      // 写入 CSS 变量
+      document.documentElement.style.setProperty('--main-text-color', normalized);
+      // 更新预览区域样式（为了预览区自身可读性，设置背景或边框）
+      preview.style.color = normalized;
+      // 如果 preview 背景与文字对比不够好，可以自动调整 preview 的背景（这里简单保持透明）
+      if (save) safeSetItem(KEY_MAIN_COLOR, normalized);
+    }
+
+    // 恢复保存的颜色（页面加载时）
+    function restoreSavedMainColor() {
+      const saved = safeGetItem(KEY_MAIN_COLOR);
+      if (saved) {
+        try {
+          colorPicker.value = saved;
+        } catch (e) {}
+        applyMainColor(saved, false);
+      } else {
+        // 默认白色
+        applyMainColor('#ffffff', false);
+      }
+    }
+
+    // 实时预览（不保存）
+    colorPicker.addEventListener('input', (e) => {
+      const c = e.target.value || '#ffffff';
+      // 实时写入 CSS 变量以便页面即时看到效果
+      document.documentElement.style.setProperty('--main-text-color', c);
+      // 预览文字颜色也更新
+      preview.style.color = c;
+    });
+
+    // 点击“应用”：保存到 localStorage
+    applyBtn.addEventListener('click', () => {
+      const c = colorPicker.value || '#ffffff';
+      applyMainColor(c, true);
+      // 给用户可见的提示（可替换为你页面的 toast）
+      try { alert('已应用并保存文字颜色：' + c); } catch (e) {}
+    });
+
+    // 点击“重置”：回到白色并保存
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('是否重置文字颜色为默认白色？')) return;
+      colorPicker.value = '#ffffff';
+      applyMainColor('#ffffff', true);
+      try { alert('已重置为默认白色'); } catch (e) {}
+    });
+
+    // 初始恢复
+    restoreSavedMainColor();
+
+    // 可选：当用户第一次交互时，如果 Notification/Audio 等需要用户交互，也可以在这里触发
+  })();
     </script>
   </body>
 </html>
